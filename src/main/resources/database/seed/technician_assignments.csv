@@ -1,0 +1,5 @@
+id,request_id,technician_id,assigned_date,assignment_status
+1,2,2,2026-02-02 09:45:00,Accepted
+2,3,5,2026-02-03 10:30:00,Assigned
+3,4,3,2026-02-04 11:10:00,Completed
+4,1,1,2026-02-01 08:20:00,Assigned
