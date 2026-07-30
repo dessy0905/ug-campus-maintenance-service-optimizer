@@ -1,0 +1,6 @@
+id,user_id,action_type,description,created_at
+1,6,Login,Administrator logged into the system,2026-02-07 08:00:00
+2,3,Request Update,Updated status for service request #1,2026-02-01 08:20:00
+3,4,Request Update,Assigned technician for request #4,2026-02-04 11:10:00
+4,6,Algorithm Run,Executed routing optimization analysis,2026-02-07 10:15:00
+5,3,Request Review,Reviewed pending requests for the day,2026-02-07 11:00:00

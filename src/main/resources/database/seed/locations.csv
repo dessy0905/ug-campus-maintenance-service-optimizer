@@ -1,0 +1,92 @@
+id,location_name,location_type,description,created_at
+1,Maths department,Department,Campus academic department,2026-01-10 08:00:00
+2,Computer science department,Department,Campus academic department,2026-01-10 08:01:00
+3,Statistics department,Department,Campus academic department,2026-01-10 08:02:00
+4,ISSSER,Department,Institute of Statistical, Social and Economic Research,2026-01-10 08:03:00
+5,Law school,Department,Faculty of law,2026-01-10 08:04:00
+6,ISSER ANNEX,Department,Annex for ISSER activities,2026-01-10 08:05:00
+7,School of engineering,Department,Engineering faculty unit,2026-01-10 08:06:00
+8,Office of risk management,Office,Campus risk and compliance office,2026-01-10 08:07:00
+9,Center for urban management studies,Department,Academic research center,2026-01-10 08:08:00
+10,International house,Office,International affairs office,2026-01-10 08:09:00
+11,K. A Busia,lecture hall,lecture halls,2026-01-10 08:10:00
+12,JQB ( Jones Quartey Building ),Lecture hall,Academic building,2026-01-10 08:11:00
+13,RT HON ALBAN BAGBIN hotspot zone,Office,Campus hotspot zone,2026-01-10 08:12:00
+14,Department of archaeology and heritage studies,Department,Academic department,2026-01-10 08:13:00
+15,Department of communication studies,Department,Academic department,2026-01-10 08:14:00
+16,School of information and communication studies,Department,Academic school,2026-01-10 08:15:00
+17,School of education and leadership,Department,Academic school,2026-01-10 08:16:00
+18,Institute of African studies,Department,Academic institute,2026-01-10 08:17:00
+19,Institute of continuing and distance education,Department,Academic institute,2026-01-10 08:18:00
+20,Department of geography,Department,Academic department,2026-01-10 08:19:00
+21,Department of earth science,Department,Academic department,2026-01-10 08:20:00
+22,Legon centre for international affairs and diplomacy (LECIAD),Department,Academic center,2026-01-10 08:21:00
+23,African regional postgraduate programme in insect science (ARPPIS),Department,Academic programme,2026-01-10 08:22:00
+24,Department of family and consumer sciences (Annex),Department,Academic department,2026-01-10 08:23:00
+25,Department of chemistry,Department,Academic department,2026-01-10 08:24:00
+26,Department of physics,Department,Academic department,2026-01-10 08:25:00
+27,Absa bank,Office,Banking facility,2026-01-10 08:26:00
+28,Standard chartered,Office,Banking facility,2026-01-10 08:27:00
+29,Balme library,Library,Main university library,2026-01-10 08:28:00
+30,UG bookshop,Office,Campus bookstore,2026-01-10 08:29:00
+31,Department of economics,Department,Academic department,2026-01-10 08:30:00
+32,Office of student affairs,Office,Student services office,2026-01-10 08:31:00
+33,Cedi conference center,Office,Conference venue,2026-01-10 08:32:00
+34,Department of philosophy and classics,Department,Academic department,2026-01-10 08:33:00
+35,Department for the study of religions,Department,Academic department,2026-01-10 08:34:00
+36,Department of African and Asian languages,Department,Academic department,2026-01-10 08:35:00
+37,Department of European languages,Department,Academic department,2026-01-10 08:36:00
+38,Department of French,Department,Academic department,2026-01-10 08:37:00
+39,Volta hall,Hall,Student residence hall,2026-01-10 08:38:00
+40,UGBS,Department,University of Ghana Business School,2026-01-10 08:39:00
+41,Staff development and learning resource center,Office,Learning support center,2026-01-10 08:40:00
+42,LOT lecture hall,Lecture Hall,Large lecture hall,2026-01-10 08:41:00
+43,School of nursing and midwifery,Department,Academic school,2026-01-10 08:42:00
+44,Department of nutrition and food science,Department,Academic department,2026-01-10 08:43:00
+45,School of pharmacy,Department,Academic school,2026-01-10 08:44:00
+46,St Thomas aquinas Catholic Church,Office,Religious center,2026-01-10 08:45:00
+47,Department of biochemistry and molecular biology,Department,Academic department,2026-01-10 08:46:00
+48,New N-Block(NNB),Lecture Hall,Lecture hall complex,2026-01-10 08:47:00
+49,GCB,Lecture Hall,Lecture hall complex,2026-01-10 08:48:00
+50,Department of marine and fishery science,Department,Academic department,2026-01-10 08:49:00
+51,School of social sciences,Department,Academic school,2026-01-10 08:50:00
+52,Department of information studies,Department,Academic department,2026-01-10 08:51:00
+53,Department of political science,Department,Academic department,2026-01-10 08:52:00
+54,New Block (NB),Lecture Hall,Lecture hall complex,2026-01-10 08:53:00
+55,Center for biodiversity conservation research,Department,Academic research center,2026-01-10 08:54:00
+56,Department of plant and environmental biology,Department,Academic department,2026-01-10 08:55:00
+57,Akuafo hall,Hall,Student residence hall,2026-01-10 08:56:00
+58,Legon hall,Hall,Student residence hall,2026-01-10 08:57:00
+59,Legon hall annex A,B,Hall,Student residence annex,2026-01-10 08:58:00
+60,Department of soil science,Department,Academic department,2026-01-10 08:59:00
+61,Department of crop science,Department,Academic department,2026-01-10 09:00:00
+62,Akuafo hall annex A ,B, C,Hall,Student residence annex,2026-01-10 09:01:00
+63,First bank national hotspot zone,Office,Campus hotspot zone,2026-01-10 09:02:00
+64,Mensah sarbah hall,Hall,Student residence hall,2026-01-10 09:03:00
+65,Mensah sarbah hall A, B, C,Hall,Student residence halls,2026-01-10 09:04:00
+66,Central cafeteria (CC),Office,Campus dining facility,2026-01-10 09:05:00
+67,SRC union office,Office,Student representative office,2026-01-10 09:06:00
+68,UG clinic,Office,Campus health center,2026-01-10 09:07:00
+69,Vikings hall,Hall,Student residence hall,2026-01-10 09:08:00
+70,Valco trust hall,Hall,Student residence hall,2026-01-10 09:09:00
+71,Center for ageing studies,Department,Academic research center,2026-01-10 09:10:00
+72,Stanbic bank,Office,Banking facility,2026-01-10 09:11:00
+73,Access bank,Office,Banking facility,2026-01-10 09:12:00
+74,Republic bank,Office,Banking facility,2026-01-10 09:13:00
+75,Prudential bank,Office,Banking facility,2026-01-10 09:14:00
+76,UG Cooperative credit union ltd,Office,Financial service center,2026-01-10 09:15:00
+77,Cal bank,Office,Banking facility,2026-01-10 09:16:00
+78,CBG,Office,Banking facility,2026-01-10 09:17:00
+79,UMB,Office,Banking facility,2026-01-10 09:18:00
+80,International student hostel (ISH) 1,Hall,Student hostel,2026-01-10 09:19:00
+81,International student hostel (ISH) 2,Hall,Student hostel,2026-01-10 09:20:00
+82,Jubilee hall,Hall,Student residence hall,2026-01-10 09:21:00
+83,Hilla Limann Hall,Hall,Student residence hall,2026-01-10 09:22:00
+84,Alexander Kwapong hall,Hall,Student residence hall,2026-01-10 09:23:00
+85,Jean Nelson hall,Hall,Student residence hall,2026-01-10 09:24:00
+86,Elizabeth Sey hall,Hall,Student residence hall,2026-01-10 09:25:00
+87,Diamond Jubilee Hall,Hall,Student residence hall,2026-01-10 09:26:00
+88,Bani hostel,Hall,Student hostel,2026-01-10 09:27:00
+89,Evandy hostel,Hall,Student hostel,2026-01-10 09:28:00
+90,Pentagon hostel,Hall,Student hostel,2026-01-10 09:29:00
+91,Great Hall,Hall,Assembly Hall,2026-01-10 09:39:00
