@@ -1,3 +1,4 @@
+-- NOTE: This SQL seed duplicates the CSV seed files in this directory; keep them in sync (or remove one source) to avoid drift.
 INSERT INTO service_categories
 (id, category_name, description)
 VALUES
@@ -126,7 +127,8 @@ VALUES
 (4, 'Kwame Badu', 'Carpentry', 4, '0244001004', 'Pickup-01', 0, '2026-01-10 10:15:00'),
 (5, 'Lydia Owusu', 'Cleaning', 5, '0244001005', 'Van-04', 1, '2026-01-10 10:20:00'),
 (6, 'Daniel Acquah', 'Security', 6, '0244001006', 'Bike-06', 1, '2026-01-10 10:25:00'),
-(7, 'Boye Jonadson', 'AC Services', 7, '00595994432', 'Van-05', 1, '2026-01-10 10:35:00'),
+(7, 'Boye Jonadson', 'AC Services', 7, '00595994432', 'Van-05', 1, '2026-01-10 10:35:00'),
+
 (8, 'Michael Asante', 'Plumbing', 1, '0244001008', 'Pickup-02', 1, '2026-01-10 10:40:00'),
 (9, 'Patricia Nkrumah', 'Electrical', 2, '0244001009', 'Van-03', 1, '2026-01-10 10:45:00'),
 (10, 'Abigail Owusu', 'ICT Support', 3, '0244001010', 'Saloon-04', 1, '2026-01-10 10:50:00'),
