@@ -1,4 +1,5 @@
--- NOTE: This SQL seed duplicates the CSV seed files in this directory; keep them in sync (or remove one source) to avoid drift.
+-- NOTE: This SQL seed duplicates the CSV seed files in this directory; keep them in sync (or remove one source) to avoid drift.
+
 INSERT INTO service_categories
 (id, category_name, description)
 VALUES
@@ -166,12 +167,12 @@ VALUES
 
 INSERT INTO service_requests (id, user_id, location_id, category_id, request_title, description, urgency_level, status, request_date, completion_date)
 VALUES
-(1, 1, 3, 1, 'Leaking pipe in library', 'Water leakage near the study area', 'High', 'Pending', '2026-02-01 08:00:00', NULL),
-(2, 2, 6, 2, 'Power outage in lecture theatre', 'Several lights are off in the lecture hall', 'High', 'Assigned', '2026-02-02 09:30:00', NULL),
-(3, 7, 4, 5, 'Blocked drain at hall', 'Drainage is blocked near the dormitory entrance', 'Medium', 'In Progress', '2026-02-03 10:15:00', NULL),
-(4, 4, 8, 3, 'Computer lab network issue', 'Students cannot access the lab network', 'Critical', 'Completed', '2026-02-04 11:00:00', '2026-02-04 14:30:00'),
-(5, 8, 2, 4, 'Broken desk in faculty office', 'One office desk is damaged and unstable', 'Low', 'Pending', '2026-02-05 12:30:00', NULL),
-(6, 5, 1, 6, 'Security gate malfunction', 'Main gate access card reader is failing', 'High', 'Cancelled', '2026-02-06 13:00:00', NULL);
+(1, 1, 3, 1, 'Leaking pipe in library', 'Water leakage near the study area', 4, 'Pending', '2026-02-01 08:00:00', NULL),
+(2, 2, 6, 2, 'Power outage in lecture theatre', 'Several lights are off in the lecture hall', 4, 'Assigned', '2026-02-02 09:30:00', NULL),
+(3, 7, 4, 5, 'Blocked drain at hall', 'Drainage is blocked near the dormitory entrance', 3, 'In Progress', '2026-02-03 10:15:00', NULL),
+(4, 4, 8, 3, 'Computer lab network issue', 'Students cannot access the lab network', 5, 'Completed', '2026-02-04 11:00:00', '2026-02-04 14:30:00'),
+(5, 8, 2, 4, 'Broken desk in faculty office', 'One office desk is damaged and unstable', 1, 'Pending', '2026-02-05 12:30:00', NULL),
+(6, 5, 1, 6, 'Security gate malfunction', 'Main gate access card reader is failing', 4, 'Cancelled', '2026-02-06 13:00:00', NULL);
 
 INSERT INTO technician_assignments (id, request_id, technician_id, assigned_date, assignment_status)
 VALUES
