@@ -121,7 +121,7 @@ CREATE TABLE service_requests (
     category_id     INT UNSIGNED NOT NULL,
     request_title   VARCHAR(255) NOT NULL,
     description     TEXT,
-    urgency_level   ENUM('Low', 'Medium', 'High', 'Critical') NOT NULL,
+    urgency_level   TINYINT UNSIGNED NOT NULL CHECK (urgency_level BETWEEN 1 AND 5),
     status          ENUM(
                       'Pending',
                       'Assigned',
