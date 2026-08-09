@@ -62,7 +62,9 @@ public class PerformanceBenchmark {
             csv.write(size + ",QuickSort," + t4 + "\n");
 
             ServiceRequest[] arr5 = copy(base, size);
-            long t5 = LinearSearch.timedSearch(arr5, arr5[size - 1]);
+            long start = System.nanoTime();
+            LinearSearch.search(arr5, arr5[size - 1]);
+            long t5 = System.nanoTime() - start;
             csv.write(size + ",LinearSearch," + t5 + "\n");
 
             ServiceRequest[] arr6 = copy(base, size);
