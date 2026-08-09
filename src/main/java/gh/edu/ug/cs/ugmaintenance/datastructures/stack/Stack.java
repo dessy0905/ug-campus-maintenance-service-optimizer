@@ -1,12 +1,12 @@
 package gh.edu.ug.cs.ugmaintenance.datastructures.stack;
 
-import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.Node;
+import gh.edu.ug.cs.ugmaintenance.datastructures.Node;
 
-public class LinkedStack<T> {
+public class Stack<T> {
     private Node<T> top;
     private int size;
 
-    public LinkedStack() {
+    public Stack() {
         this.top = null;
         this.size = 0;
     }
@@ -16,6 +16,18 @@ public class LinkedStack<T> {
         newNode.next = top;
         top = newNode;
         size++;
+    }
+
+    public void display(){
+        if (isEmpty()) {
+            System.out.println("Stack is empty");
+            return;
+        }
+        Node<T> current = top;
+        while (current != null) {
+            System.out.print(current.data + " ");
+            current = current.next;
+        }
     }
 
     public T pop() {

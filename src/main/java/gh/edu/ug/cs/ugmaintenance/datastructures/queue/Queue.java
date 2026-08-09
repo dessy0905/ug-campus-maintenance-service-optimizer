@@ -1,13 +1,13 @@
 package gh.edu.ug.cs.ugmaintenance.datastructures.queue;
 
-import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.Node;
+import gh.edu.ug.cs.ugmaintenance.datastructures.Node;
 
-public class LinkedQueue<T> {
+public class Queue<T> {
     private Node<T> front;
     private Node<T> rear;
     private int size;
 
-    public LinkedQueue() {
+    public Queue() {
         this.front = null;
         this.rear = null;
         this.size = 0;
@@ -43,6 +43,18 @@ public class LinkedQueue<T> {
             throw new RuntimeException("Queue is empty — cannot peek");
         }
         return front.data;
+    }
+
+        public void display(){
+        if (isEmpty()) {
+            System.out.println("Queue is empty");
+            return;
+        }
+        Node<T> current = front;
+        while (current != null) {
+            System.out.print(current.data + " ");
+            current = current.next;
+        }
     }
 
     public boolean isEmpty() {
