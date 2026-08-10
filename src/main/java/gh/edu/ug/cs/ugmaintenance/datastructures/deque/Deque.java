@@ -1,10 +1,8 @@
 package gh.edu.ug.cs.ugmaintenance.datastructures.deque;
 
-import gh.edu.ug.cs.ugmaintenance.datastructures.Node;
-
 public class Deque<T> {
-    private Node<T> front;
-    private Node<T> rear;
+    private DoublyNode<T> front;
+    private DoublyNode<T> rear;
     private int size;
 
     public Deque() {
@@ -14,7 +12,7 @@ public class Deque<T> {
     }
 
     public void addFront(T data) {
-        Node<T> newNode = new Node<>(data);
+        DoublyNode<T> newNode = new DoublyNode<>(data);
         if (isEmpty()) {
             front = newNode;
             rear = newNode;
@@ -27,7 +25,7 @@ public class Deque<T> {
     }
 
     public void addRear(T data) {
-        Node<T> newNode = new Node<>(data);
+        DoublyNode<T> newNode = new DoublyNode<>(data);
         if (isEmpty()) {
             front = newNode;
             rear = newNode;
@@ -67,19 +65,6 @@ public class Deque<T> {
         }
         size--;
         return data;
-    }
-
-    public void display() {
-        if (isEmpty()) {
-            System.out.println("Deque is empty");
-            return;
-        }
-        Node<T> current = front;
-        while (current != null) {
-            System.out.print(current.data + " ");
-            current = current.next;
-        }
-        System.out.println();
     }
 
     public boolean isEmpty() {

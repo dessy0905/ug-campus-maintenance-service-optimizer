@@ -36,23 +36,6 @@ public class CircularQueue<T> {
         return data;
     }
 
-    public void display() {
-        if (isEmpty()) {
-            System.out.println("Circular Queue is empty");
-            return;
-        }
-        int i = front;
-        int count = 0;
-        while (count < size) {
-            System.out.print(items[i] + " ");
-            i = (i + 1) % capacity;
-            count++;
-        }
-        System.out.println();
-    }
-
- 
-
     @SuppressWarnings("unchecked")
     public T peek() {
         if (isEmpty()) {
