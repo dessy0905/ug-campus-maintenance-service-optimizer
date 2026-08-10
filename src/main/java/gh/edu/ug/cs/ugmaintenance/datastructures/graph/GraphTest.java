@@ -1,7 +1,5 @@
 package gh.edu.ug.cs.ugmaintenance.datastructures.graph;
 
-import java.util.List;
-
 public class GraphTest {
 
     public static void main(String[] args) {
