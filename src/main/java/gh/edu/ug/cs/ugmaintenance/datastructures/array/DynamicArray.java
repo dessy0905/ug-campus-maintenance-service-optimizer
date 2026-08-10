@@ -9,11 +9,13 @@ public class DynamicArray<T> {
     private T[] elements;
     private int size;
 
+    @SuppressWarnings("unchecked")
     public DynamicArray() {
         elements = (T[]) new Object[DEFAULT_CAPACITY];
         size = 0;
     }
 
+    @SuppressWarnings("unchecked")
     public DynamicArray(int capacity) {
         if (capacity < 0) {
             throw new IllegalArgumentException("Capacity cannot be negative");
@@ -23,22 +25,49 @@ public class DynamicArray<T> {
         size = 0;
     }
 
+    // Add an element to the end of the array
     public void add(T element) {
         ensureCapacity();
         elements[size] = element;
         size++;
     }
 
+    // Add an element at a specific index
+    public void add(int index, T element) {
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException(
+                    "Index: " + index + ", Size: " + size
+            );
+        }
+
+        ensureCapacity();
+
+        // Shift elements one position to the right
+        System.arraycopy(
+                elements,
+                index,
+                elements,
+                index + 1,
+                size - index
+        );
+
+        elements[index] = element;
+        size++;
+    }
+
+    // Get an element at a specific index
     public T get(int index) {
         checkIndex(index);
         return elements[index];
     }
 
+    // Replace an element at a specific index
     public void set(int index, T element) {
         checkIndex(index);
         elements[index] = element;
     }
 
+    // Remove an element at a specific index
     public T remove(int index) {
         checkIndex(index);
 
@@ -48,11 +77,11 @@ public class DynamicArray<T> {
 
         if (elementsToMove > 0) {
             System.arraycopy(
-                elements,
-                index + 1,
-                elements,
-                index,
-                elementsToMove
+                    elements,
+                    index + 1,
+                    elements,
+                    index,
+                    elementsToMove
             );
         }
 
@@ -62,6 +91,7 @@ public class DynamicArray<T> {
         return removedElement;
     }
 
+    // Check whether an element exists
     public boolean contains(T element) {
         for (int i = 0; i < size; i++) {
             if (element == null) {
@@ -76,23 +106,28 @@ public class DynamicArray<T> {
         return false;
     }
 
+    // Return the number of elements
     public int size() {
         return size;
     }
 
+    // Check whether the array is empty
     public boolean isEmpty() {
         return size == 0;
     }
 
+    // Remove all elements
     public void clear() {
         Arrays.fill(elements, 0, size, null);
         size = 0;
     }
 
+    // Return the current capacity
     public int capacity() {
         return elements.length;
     }
 
+    // Increase capacity when the array is full
     @SuppressWarnings("unchecked")
     private void ensureCapacity() {
         if (size < elements.length) {
@@ -110,20 +145,21 @@ public class DynamicArray<T> {
         T[] newElements = (T[]) new Object[newCapacity];
 
         System.arraycopy(
-            elements,
-            0,
-            newElements,
-            0,
-            size
+                elements,
+                0,
+                newElements,
+                0,
+                size
         );
 
         elements = newElements;
     }
 
+    // Validate an index for existing elements
     private void checkIndex(int index) {
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException(
-                "Index: " + index + ", Size: " + size
+                    "Index: " + index + ", Size: " + size
             );
         }
     }
