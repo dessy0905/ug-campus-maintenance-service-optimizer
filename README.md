@@ -74,6 +74,40 @@ src
 
 ---
 
+## Hash Table, Set and Map (Member 9 - Cheryl Abena Asantewaa Kwakye)
+
+Implemented from scratch (no `java.util.HashMap`/`HashSet` used) under
+`src/main/java/gh/edu/ug/cs/ugmaintenance/datastructures/hashtable/`:
+
+| Class | Description | Key operations |
+|---|---|---|
+| `HashTable<K, V>` | Core hash table with **separate chaining** for collisions and automatic **resize/rehash** when the load factor exceeds a configurable threshold (default 0.75). Exposes collision statistics for the efficiency lab. | `put`, `get`, `remove`, `containsKey`, `containsValue`, `clear`, `getLoadFactor`, `getCollisionCount`, `getMaxChainLength`, `getAverageChainLength` |
+| `Set<T>` | Set built on top of `HashTable` (elements stored as keys). | `add`, `remove`, `contains`, `union`, `intersection`, `difference`, `isSubsetOf` |
+| `Map<K, V>` | Map built on top of `HashTable` (thin delegation with map conveniences). | `put`, `get`, `getOrDefault`, `putIfAbsent`, `remove`, `keySet`, `values` |
+
+### Run the demo
+
+```bash
+mvn compile
+java -cp target/classes gh.edu.ug.cs.ugmaintenance.datastructures.hashtable.HashTableDemo
+```
+
+The demo shows a campus location look-up index, set algebra on technician
+specialisations, a technician-to-vehicle map, load factor vs collision
+statistics, and insert/look-up timing that is exported to
+`performance_member9_hashtable.csv`.
+
+### Run the tests
+
+```bash
+mvn test -Dtest=HashTableTest
+```
+
+41 unit tests cover normal, boundary and invalid-input cases (null keys,
+collisions, resize/rehash, empty and single-element tables).
+
+---
+
 ## Algorithms
 
 ### Searching
