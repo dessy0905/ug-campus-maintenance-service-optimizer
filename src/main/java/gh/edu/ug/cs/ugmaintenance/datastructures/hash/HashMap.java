@@ -1,6 +1,6 @@
-package gh.edu.ug.cs.ugmaintenance.datastructures.hashtable;
+package gh.edu.ug.cs.ugmaintenance.datastructures.hash;
 
-import java.util.List;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 
 /**
  * A custom Map implemented on top of the {@link HashTable} (member #9 deliverable).
@@ -21,19 +21,19 @@ import java.util.List;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
  */
-public class Map<K, V> {
+public class HashMap<K, V> implements Map<K, V> {
 
     private final HashTable<K, V> table;
 
-    public Map() {
+    public HashMap() {
         this.table = new HashTable<>();
     }
 
-    public Map(int initialCapacity) {
+    public HashMap(int initialCapacity) {
         this.table = new HashTable<>(initialCapacity);
     }
 
-    public Map(int initialCapacity, double loadFactorThreshold) {
+    public HashMap(int initialCapacity, double loadFactorThreshold) {
         this.table = new HashTable<>(initialCapacity, loadFactorThreshold);
     }
 
@@ -41,16 +41,20 @@ public class Map<K, V> {
      * Associates the given value with the given key, returning the previous
      * value if the key already existed, otherwise {@code null}.
      */
+
+    @Override
     public V put(K key, V value) {
         return table.put(key, value);
     }
 
+    @Override
     /** Returns the value bound to the key, or {@code null} if absent. */
     public V get(K key) {
         return table.get(key);
     }
 
     /** Returns the value bound to the key, or {@code defaultValue} if absent. */
+    @Override
     public V getOrDefault(K key, V defaultValue) {
         if (!table.containsKey(key)) {
             return defaultValue;
@@ -59,6 +63,7 @@ public class Map<K, V> {
     }
 
     /** Binds the value only if the key is not already present. */
+    @Override
     public V putIfAbsent(K key, V value) {
         if (table.containsKey(key)) {
             return table.get(key);
@@ -67,36 +72,44 @@ public class Map<K, V> {
     }
 
     /** Removes the entry for the key, returning the removed value or {@code null}. */
+    @Override
     public V remove(K key) {
         return table.remove(key);
     }
 
+    @Override
     public boolean containsKey(K key) {
         return table.containsKey(key);
     }
 
+    @Override
     public boolean containsValue(V value) {
         return table.containsValue(value);
     }
 
+    @Override
     public int size() {
         return table.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return table.isEmpty();
     }
 
+    @Override
     public void clear() {
         table.clear();
     }
 
     /** All keys currently in the map. */
+    @Override
     public List<K> keySet() {
         return table.keySet();
     }
 
     /** All values currently in the map. */
+    @Override
     public List<V> values() {
         return table.values();
     }
@@ -112,6 +125,7 @@ public class Map<K, V> {
     }
 
     /** Prints the map entries (demo/evidence aid). */
+    @Override
     public void display() {
         List<K> keys = table.keySet();
         System.out.print("Map{");

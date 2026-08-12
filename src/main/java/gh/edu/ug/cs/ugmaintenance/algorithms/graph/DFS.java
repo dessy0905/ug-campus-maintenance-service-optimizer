@@ -1,8 +1,9 @@
 package gh.edu.ug.cs.ugmaintenance.algorithms.graph;
 
 import gh.edu.ug.cs.ugmaintenance.datastructures.graph.Graph;
+import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashSet;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 import gh.edu.ug.cs.ugmaintenance.datastructures.stack.Stack;
-import gh.edu.ug.cs.ugmaintenance.datastructures.hashtable.Set;
 
 public class DFS {
 
@@ -21,7 +22,7 @@ public class DFS {
         }
 
         Stack<Integer> stack = new Stack<>();
-        Set<Integer> visited = new Set<>();
+        HashSet<Integer> visited = new HashSet<>();
 
         // Start the traversal
         stack.push(startVertex);
@@ -42,7 +43,9 @@ public class DFS {
             System.out.print(currentVertex + " ");
 
             // Add unvisited neighbours to the stack
-            for (Integer neighbour : graph.getNeighbours(currentVertex).toList()) {
+            List<Integer> neighbours = graph.getNeighbours(currentVertex).toList();
+            for (int i = 0; i < neighbours.size(); i++) {
+                Integer neighbour = neighbours.get(i);
 
                 if (!visited.contains(neighbour)) {
                     stack.push(neighbour);

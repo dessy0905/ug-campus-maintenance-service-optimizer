@@ -6,10 +6,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
+import gh.edu.ug.cs.ugmaintenance.datastructures.array.DynamicArray;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 import gh.edu.ug.cs.ugmaintenance.models.User;
 import gh.edu.ug.cs.ugmaintenance.models.enums.UserRole;
 
@@ -115,7 +115,7 @@ public class CampusUserRepository extends BaseRepository implements CrudReposito
     @Override
     public List<User> findAll() {
         String sql = "SELECT * FROM campus_users";
-        List<User> users = new ArrayList<>();
+        List<User> users = new DynamicArray<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);

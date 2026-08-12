@@ -1,8 +1,9 @@
 package gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist;
 
 import gh.edu.ug.cs.ugmaintenance.datastructures.Node;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 
-public class LinkedList<T> {
+public class LinkedList<T>  implements List<T> {
 
     private Node<T> head;
     private Node<T> tail;
@@ -15,6 +16,7 @@ public class LinkedList<T> {
     }
 
     // Add an element to the end of the list
+    @Override
     public void add(T data) {
         Node<T> newNode = new Node<>(data);
 
@@ -31,6 +33,7 @@ public class LinkedList<T> {
     }
 
     // Add an element at a specific index
+    @Override
     public void add(int index, T data) {
         if (index < 0 || index > size) {
             throw new IndexOutOfBoundsException(
@@ -65,18 +68,22 @@ public class LinkedList<T> {
     }
 
     // Get an element at a specific index
+    @Override
     public T get(int index) {
         return getNode(index).data;
     }
 
     // Replace an element at a specific index
+    @Override
     public void set(int index, T data) {
         getNode(index).data = data;
     }
 
     // Remove an element at a specific index
+    @Override
     public T remove(int index) {
         Node<T> current = getNode(index);
+        T removedData = current.data;
 
         if (current.previous != null) {
             current.previous.next = current.next;
@@ -90,12 +97,17 @@ public class LinkedList<T> {
             tail = current.previous;
         }
 
+        current.data = null;
+        current.next = null;
+        current.previous = null;
+
         size--;
 
-        return current.data;
+        return removedData;
     }
 
     // Check whether an element exists
+    @Override
     public boolean contains(T data) {
         Node<T> current = head;
 
@@ -115,17 +127,28 @@ public class LinkedList<T> {
     }
 
     // Return the number of elements
+    @Override
     public int size() {
         return size;
     }
 
     // Check whether the list is empty
+    @Override
     public boolean isEmpty() {
         return size == 0;
     }
 
     // Remove all elements
+    @Override
     public void clear() {
+        Node<T> current = head;
+        while (current != null) {
+            Node<T> nextNode = current.next;
+            current.data = null;
+            current.next = null;
+            current.previous = null;
+            current = nextNode;
+        }        
         head = null;
         tail = null;
         size = 0;
@@ -134,7 +157,7 @@ public class LinkedList<T> {
     // Get the first element
     public T getFirst() {
         if (isEmpty()) {
-            throw new RuntimeException("Linked List is empty");
+            throw new IndexOutOfBoundsException("Linked List is empty");
         }
 
         return head.data;
@@ -143,7 +166,7 @@ public class LinkedList<T> {
     // Get the last element
     public T getLast() {
         if (isEmpty()) {
-            throw new RuntimeException("Linked List is empty");
+            throw new IndexOutOfBoundsException("Linked List is empty");
         }
 
         return tail.data;

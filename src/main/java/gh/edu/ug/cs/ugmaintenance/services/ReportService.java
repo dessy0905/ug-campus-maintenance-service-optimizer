@@ -1,8 +1,8 @@
 package gh.edu.ug.cs.ugmaintenance.services;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashMap;
+import gh.edu.ug.cs.ugmaintenance.datastructures.hash.Map;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 
 import gh.edu.ug.cs.ugmaintenance.models.ServiceRequest;
 import gh.edu.ug.cs.ugmaintenance.models.Technician;
@@ -48,7 +48,8 @@ public class ReportService {
         stats.put("available", 0);
         stats.put("unavailable", 0);
 
-        for (Technician technician : technicians) {
+        for (int i = 0; i < technicians.size(); i++) {
+            Technician technician = technicians.get(i);
             if (technician.isAvailabilityStatus()) {
                 stats.put("available", stats.get("available") + 1);
             } else {

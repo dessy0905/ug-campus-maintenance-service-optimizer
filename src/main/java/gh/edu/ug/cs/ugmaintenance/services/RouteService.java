@@ -1,12 +1,11 @@
 package gh.edu.ug.cs.ugmaintenance.services;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import gh.edu.ug.cs.ugmaintenance.datastructures.array.DynamicArray;
+import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashMap;
+import gh.edu.ug.cs.ugmaintenance.datastructures.hash.Map;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
+import gh.edu.ug.cs.ugmaintenance.datastructures.queue.PriorityQueue;
 import java.util.Optional;
-import java.util.PriorityQueue;
 
 import gh.edu.ug.cs.ugmaintenance.models.Road;
 import gh.edu.ug.cs.ugmaintenance.models.Technician;
@@ -27,7 +26,7 @@ public class RouteService {
         validateLocationIds(startLocationId, endLocationId);
 
         if (startLocationId == endLocationId) {
-            List<Integer> path = new ArrayList<>();
+            List<Integer> path = new DynamicArray<>();
             path.add(startLocationId);
             return path;
         }
@@ -35,7 +34,7 @@ public class RouteService {
         Map<Integer, List<Road>> adjacency = buildAdjacencyMap();
         Map<Integer, Double> distances = new HashMap<>();
         Map<Integer, Integer> previous = new HashMap<>();
-        PriorityQueue<RouteStep> queue = new PriorityQueue<>(Comparator.comparingDouble(step -> step.distance));
+        PriorityQueue<RouteStep> queue = new PriorityQueue<>();
 
         distances.put(startLocationId, 0.0);
         queue.offer(new RouteStep(startLocationId, 0.0));
@@ -50,8 +49,9 @@ public class RouteService {
                 break;
             }
 
-            List<Road> outgoing = adjacency.getOrDefault(current.locationId, new ArrayList<>());
-            for (Road road : outgoing) {
+            List<Road> outgoing = adjacency.getOrDefault(current.locationId, new DynamicArray<>());
+            for (int i = 0; i < outgoing.size(); i++) {
+                Road road = outgoing.get(i);
                 int nextLocation = road.getToLocationId();
                 double candidateDistance = current.distance + road.getDistanceKm();
 
@@ -64,10 +64,10 @@ public class RouteService {
         }
 
         if (!distances.containsKey(endLocationId)) {
-            return new ArrayList<>();
+            return new DynamicArray<>();
         }
 
-        List<Integer> path = new ArrayList<>();
+        List<Integer> path = new DynamicArray<>();
         int current = endLocationId;
         while (current != 0) {
             path.add(0, current);
@@ -75,13 +75,13 @@ public class RouteService {
                 if (current == startLocationId) {
                     break;
                 }
-                return new ArrayList<>();
+                return new DynamicArray<>();
             }
             current = previous.get(current);
         }
 
         if (path.isEmpty() || path.get(0) != startLocationId) {
-            return new ArrayList<>();
+            return new DynamicArray<>();
         }
 
         return path;
@@ -103,11 +103,16 @@ public class RouteService {
         for (int i = 0; i < route.size() - 1; i++) {
             int from = route.get(i);
             int to = route.get(i + 1);
-            totalDistance += roadRepository.findByFromLocation(from).stream()
-                    .filter(road -> road.getToLocationId() == to)
-                    .mapToDouble(Road::getDistanceKm)
-                    .findFirst()
-                    .orElse(0.0);
+            List<Road> neighbors = roadRepository.findByFromLocation(from);
+            double segmentDistance = 0.0;
+            for (int j = 0; j < neighbors.size(); j++) {
+                Road road = neighbors.get(j);
+                if (road.getToLocationId() == to) {
+                    segmentDistance = road.getDistanceKm();
+                    break;
+                }
+            }
+            totalDistance += segmentDistance;
         }
 
         return totalDistance == 0.0 && route.size() > 1 ? -1.0 : totalDistance;
@@ -139,9 +144,17 @@ public class RouteService {
 
     private Map<Integer, List<Road>> buildAdjacencyMap() {
         Map<Integer, List<Road>> adjacency = new HashMap<>();
+        List<Road> roads = roadRepository.findAll();
 
-        for (Road road : roadRepository.findAll()) {
-            adjacency.computeIfAbsent(road.getFromLocationId(), key -> new ArrayList<>()).add(road);
+        for (int i = 0; i < roads.size(); i++) {
+            Road road = roads.get(i);
+            int key = road.getFromLocationId();
+            List<Road> bucket = adjacency.get(key);
+            if (bucket == null) {
+                bucket = new DynamicArray<>();
+                adjacency.put(key, bucket);
+            }
+            bucket.add(road);
         }
 
         return adjacency;
@@ -158,13 +171,18 @@ public class RouteService {
         }
     }
 
-    private static class RouteStep {
+    private static class RouteStep implements Comparable<RouteStep> {
         private final int locationId;
         private final double distance;
 
         private RouteStep(int locationId, double distance) {
             this.locationId = locationId;
             this.distance = distance;
+        }
+
+        @Override
+        public int compareTo(RouteStep other) {
+            return Double.compare(this.distance, other.distance);
         }
     }
 }

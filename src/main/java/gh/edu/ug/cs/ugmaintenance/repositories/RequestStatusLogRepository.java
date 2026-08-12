@@ -6,10 +6,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
+import gh.edu.ug.cs.ugmaintenance.datastructures.array.DynamicArray;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 import gh.edu.ug.cs.ugmaintenance.models.RequestStatusLog;
 import gh.edu.ug.cs.ugmaintenance.models.enums.RequestStatus;
 
@@ -117,7 +117,7 @@ public class RequestStatusLogRepository extends BaseRepository implements CrudRe
     @Override
     public List<RequestStatusLog> findAll() {
         String sql = "SELECT * FROM request_status_logs";
-        List<RequestStatusLog> logs = new ArrayList<>();
+        List<RequestStatusLog> logs = new DynamicArray<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);

@@ -6,10 +6,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
+import gh.edu.ug.cs.ugmaintenance.datastructures.array.DynamicArray;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 import gh.edu.ug.cs.ugmaintenance.models.Location;
 import gh.edu.ug.cs.ugmaintenance.models.enums.LocationType;
 
@@ -107,7 +107,7 @@ public class LocationRepository extends BaseRepository implements CrudRepository
     @Override
     public List<Location> findAll() {
         String sql = "SELECT * FROM locations";
-        List<Location> locations = new ArrayList<>();
+        List<Location> locations = new DynamicArray<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);

@@ -6,10 +6,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
+import gh.edu.ug.cs.ugmaintenance.datastructures.array.DynamicArray;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 import gh.edu.ug.cs.ugmaintenance.models.Road;
 import gh.edu.ug.cs.ugmaintenance.models.enums.RoadCondition;
 
@@ -117,7 +117,7 @@ public class RoadRepository extends BaseRepository implements CrudRepository<Roa
     @Override
     public List<Road> findAll() {
         String sql = "SELECT * FROM roads";
-        List<Road> roads = new ArrayList<>();
+        List<Road> roads = new DynamicArray<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
@@ -139,7 +139,7 @@ public class RoadRepository extends BaseRepository implements CrudRepository<Roa
         }
 
         String sql = "SELECT * FROM roads WHERE from_location_id = ?";
-        List<Road> roads = new ArrayList<>();
+        List<Road> roads = new DynamicArray<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -163,7 +163,7 @@ public class RoadRepository extends BaseRepository implements CrudRepository<Roa
         }
 
         String sql = "SELECT * FROM roads WHERE from_location_id = ? OR to_location_id = ?";
-        List<Road> roads = new ArrayList<>();
+        List<Road> roads = new DynamicArray<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {

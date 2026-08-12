@@ -1,8 +1,8 @@
 package gh.edu.ug.cs.ugmaintenance.datastructures.array;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 
-import java.util.Arrays;
 
-public class DynamicArray<T> {
+public class DynamicArray<T> implements List<T>{
 
     private static final int DEFAULT_CAPACITY = 10;
 
@@ -26,6 +26,7 @@ public class DynamicArray<T> {
     }
 
     // Add an element to the end of the array
+    @Override
     public void add(T element) {
         ensureCapacity();
         elements[size] = element;
@@ -33,6 +34,7 @@ public class DynamicArray<T> {
     }
 
     // Add an element at a specific index
+    @Override
     public void add(int index, T element) {
         if (index < 0 || index > size) {
             throw new IndexOutOfBoundsException(
@@ -43,31 +45,30 @@ public class DynamicArray<T> {
         ensureCapacity();
 
         // Shift elements one position to the right
-        System.arraycopy(
-                elements,
-                index,
-                elements,
-                index + 1,
-                size - index
-        );
+        for (int i = size; i > index; i--) {
+            elements[i] = elements[i - 1];
+        }
 
         elements[index] = element;
         size++;
     }
 
     // Get an element at a specific index
+    @Override
     public T get(int index) {
         checkIndex(index);
         return elements[index];
     }
 
     // Replace an element at a specific index
+    @Override
     public void set(int index, T element) {
         checkIndex(index);
         elements[index] = element;
     }
 
     // Remove an element at a specific index
+    @Override
     public T remove(int index) {
         checkIndex(index);
 
@@ -76,13 +77,9 @@ public class DynamicArray<T> {
         int elementsToMove = size - index - 1;
 
         if (elementsToMove > 0) {
-            System.arraycopy(
-                    elements,
-                    index + 1,
-                    elements,
-                    index,
-                    elementsToMove
-            );
+            for (int i = index; i < size - 1; i++) {
+                elements[i] = elements[i + 1];
+            }
         }
 
         elements[size - 1] = null;
@@ -92,6 +89,7 @@ public class DynamicArray<T> {
     }
 
     // Check whether an element exists
+    @Override
     public boolean contains(T element) {
         for (int i = 0; i < size; i++) {
             if (element == null) {
@@ -107,18 +105,23 @@ public class DynamicArray<T> {
     }
 
     // Return the number of elements
+    @Override
     public int size() {
         return size;
     }
 
     // Check whether the array is empty
+    @Override
     public boolean isEmpty() {
         return size == 0;
     }
 
     // Remove all elements
+    @Override
     public void clear() {
-        Arrays.fill(elements, 0, size, null);
+        for (int i = 0; i < size; i++) {
+            elements[i] = null;
+        }
         size = 0;
     }
 
@@ -144,13 +147,9 @@ public class DynamicArray<T> {
 
         T[] newElements = (T[]) new Object[newCapacity];
 
-        System.arraycopy(
-                elements,
-                0,
-                newElements,
-                0,
-                size
-        );
+        for (int i = 0; i < size; i++) {
+            newElements[i] = elements[i];
+        }
 
         elements = newElements;
     }
