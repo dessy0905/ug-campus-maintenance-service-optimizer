@@ -6,10 +6,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
+import gh.edu.ug.cs.ugmaintenance.datastructures.array.DynamicArray;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 import gh.edu.ug.cs.ugmaintenance.models.TechnicianAssignment;
 import gh.edu.ug.cs.ugmaintenance.models.enums.AssignmentStatus;
 
@@ -113,7 +113,7 @@ public class TechnicianAssignmentRepository extends BaseRepository implements Cr
     @Override
     public List<TechnicianAssignment> findAll() {
         String sql = "SELECT * FROM technician_assignments";
-        List<TechnicianAssignment> assignments = new ArrayList<>();
+        List<TechnicianAssignment> assignments = new DynamicArray<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);

@@ -5,10 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
+import gh.edu.ug.cs.ugmaintenance.datastructures.array.DynamicArray;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 import gh.edu.ug.cs.ugmaintenance.models.ServiceCategory;
 
 public class ServiceCategoryRepository extends BaseRepository implements CrudRepository<ServiceCategory, Integer> {
@@ -105,7 +105,7 @@ public class ServiceCategoryRepository extends BaseRepository implements CrudRep
     @Override
     public List<ServiceCategory> findAll() {
         String sql = "SELECT * FROM service_categories";
-        List<ServiceCategory> categories = new ArrayList<>();
+        List<ServiceCategory> categories = new DynamicArray<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);

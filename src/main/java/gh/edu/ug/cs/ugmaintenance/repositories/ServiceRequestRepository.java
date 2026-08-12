@@ -8,10 +8,10 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
+import gh.edu.ug.cs.ugmaintenance.datastructures.array.DynamicArray;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 import gh.edu.ug.cs.ugmaintenance.models.ServiceRequest;
 import gh.edu.ug.cs.ugmaintenance.models.enums.RequestStatus;
 
@@ -165,7 +165,7 @@ public class ServiceRequestRepository
     @Override
     public List<ServiceRequest> findAll() {
         String sql = "SELECT * FROM service_requests";
-        List<ServiceRequest> requests = new ArrayList<>();
+        List<ServiceRequest> requests = new DynamicArray<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
@@ -196,7 +196,7 @@ public class ServiceRequestRepository
         }
 
         String sql = "SELECT * FROM service_requests WHERE status = ? ORDER BY request_date DESC";
-        List<ServiceRequest> requests = new ArrayList<>();
+        List<ServiceRequest> requests = new DynamicArray<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -221,7 +221,7 @@ public class ServiceRequestRepository
         }
 
         String sql = "SELECT * FROM service_requests WHERE urgency_level = ? ORDER BY request_date DESC";
-        List<ServiceRequest> requests = new ArrayList<>();
+        List<ServiceRequest> requests = new DynamicArray<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -246,7 +246,7 @@ public class ServiceRequestRepository
         }
 
         String sql = "SELECT * FROM service_requests WHERE category_id = ? ORDER BY request_date DESC";
-        List<ServiceRequest> requests = new ArrayList<>();
+        List<ServiceRequest> requests = new DynamicArray<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -271,7 +271,7 @@ public class ServiceRequestRepository
         }
 
         String sql = "SELECT * FROM service_requests WHERE location_id = ? ORDER BY request_date DESC";
-        List<ServiceRequest> requests = new ArrayList<>();
+        List<ServiceRequest> requests = new DynamicArray<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {

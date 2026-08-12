@@ -1,6 +1,6 @@
 package gh.edu.ug.cs.ugmaintenance.repositories;
 
-import java.util.List;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 import java.util.Optional;
 
 public interface CrudRepository<T, ID> {

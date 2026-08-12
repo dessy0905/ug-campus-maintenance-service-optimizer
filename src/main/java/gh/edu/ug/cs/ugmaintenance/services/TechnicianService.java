@@ -1,9 +1,9 @@
 package gh.edu.ug.cs.ugmaintenance.services;
 
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 import gh.edu.ug.cs.ugmaintenance.models.Technician;
 import gh.edu.ug.cs.ugmaintenance.repositories.TechnicianRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 public class TechnicianService {

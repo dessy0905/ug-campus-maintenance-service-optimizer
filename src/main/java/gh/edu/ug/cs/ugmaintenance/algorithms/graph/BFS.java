@@ -1,8 +1,9 @@
 package gh.edu.ug.cs.ugmaintenance.algorithms.graph;
 
 import gh.edu.ug.cs.ugmaintenance.datastructures.graph.Graph;
+import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashSet;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 import gh.edu.ug.cs.ugmaintenance.datastructures.queue.Queue;
-import gh.edu.ug.cs.ugmaintenance.datastructures.hashtable.Set;
 
 public class BFS {
 
@@ -21,7 +22,7 @@ public class BFS {
         }
 
         Queue<Integer> queue = new Queue<>();
-        Set<Integer> visited = new Set<>();
+        HashSet<Integer> visited = new HashSet<>();
 
         // Mark the starting vertex as visited
         visited.add(startVertex);
@@ -36,10 +37,11 @@ public class BFS {
             System.out.print(currentVertex + " ");
 
             // Visit all unvisited neighbours
-            for (Integer neighbour : graph.getNeighbours(currentVertex).toList()) {
+            List<Integer> neighbours = graph.getNeighbours(currentVertex).toList();
+            for (int i = 0; i < neighbours.size(); i++) {
+                Integer neighbour = neighbours.get(i);
 
                 if (!visited.contains(neighbour)) {
-
                     visited.add(neighbour);
                     queue.enqueue(neighbour);
                 }

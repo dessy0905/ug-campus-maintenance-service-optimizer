@@ -1,12 +1,12 @@
 package gh.edu.ug.cs.ugmaintenance.services;
 
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 import gh.edu.ug.cs.ugmaintenance.models.ServiceRequest;
 import gh.edu.ug.cs.ugmaintenance.models.enums.RequestStatus;
 import gh.edu.ug.cs.ugmaintenance.repositories.ServiceRequestRepository;
 
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 public class ServiceRequestService {

@@ -1,4 +1,6 @@
-package gh.edu.ug.cs.ugmaintenance.datastructures.graph;
+package gh.edu.ug.cs.ugmaintenance.datastructures;
+
+import gh.edu.ug.cs.ugmaintenance.datastructures.graph.Graph;
 
 public class GraphTest {
 

@@ -1,7 +1,6 @@
-package gh.edu.ug.cs.ugmaintenance.datastructures.hashtable;
+package gh.edu.ug.cs.ugmaintenance.datastructures.hash;
 
-import java.util.List;
-
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;   
 /**
  * A custom Set implemented on top of the {@link HashTable} (member #9 deliverable).
  *
@@ -20,17 +19,17 @@ import java.util.List;
  *
  * @param <T> the type of elements maintained by this set
  */
-public class Set<T> {
+public class HashSet<T> implements Set<T> {
 
     private static final Object PRESENT = new Object();
 
     private final HashTable<T, Object> table;
 
-    public Set() {
+    public HashSet() {
         this.table = new HashTable<>();
     }
 
-    public Set(int initialCapacity) {
+    public HashSet(int initialCapacity) {
         this.table = new HashTable<>(initialCapacity);
     }
 
@@ -41,6 +40,8 @@ public class Set<T> {
      *         {@code false} if it was already present
      * @throws IllegalArgumentException if {@code element} is {@code null}
      */
+
+    @Override
     public boolean add(T element) {
         if (element == null) {
             throw new IllegalArgumentException("Set does not accept null elements");
@@ -53,48 +54,61 @@ public class Set<T> {
      *
      * @return {@code true} if the element was present and removed
      */
+    @Override
     public boolean remove(T element) {
         return table.remove(element) != null;
     }
 
     /** Returns {@code true} if the element is a member of the set. */
+    
+    @Override
     public boolean contains(T element) {
         return table.containsKey(element);
     }
 
+    @Override
     public int size() {
         return table.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return table.isEmpty();
     }
 
+    @Override
     public void clear() {
         table.clear();
     }
 
     /** All elements of the set. */
+    @Override
     public List<T> toList() {
         return table.keySet();
     }
 
     /** Union: elements in this set or in {@code other}. */
-    public Set<T> union(Set<T> other) {
-        Set<T> result = new Set<>(table.getCapacity() + other.table.getCapacity());
-        for (T element : this.toList()) {
-            result.add(element);
+    @Override
+    public HashSet<T> union(Set<T> other) {
+        HashSet<T> result = new HashSet<>();
+        List<T> thisElements = this.toList();
+        for (int i = 0; i < thisElements.size(); i++) {
+            result.add(thisElements.get(i));
         }
-        for (T element : other.toList()) {
-            result.add(element);
+        List<T> otherElements = other.toList();
+        for (int i = 0; i < otherElements.size(); i++) {
+            result.add(otherElements.get(i));
         }
         return result;
     }
 
     /** Intersection: elements in both this set and {@code other}. */
-    public Set<T> intersection(Set<T> other) {
-        Set<T> result = new Set<>(Math.min(table.getCapacity(), other.table.getCapacity()));
-        for (T element : this.toList()) {
+    @Override
+    public HashSet<T> intersection(Set<T> other) {
+        HashSet<T> result = new HashSet<>();
+        List<T> thisElements = this.toList();
+        for (int i = 0; i < thisElements.size(); i++) {
+            T element = thisElements.get(i);
             if (other.contains(element)) {
                 result.add(element);
             }
@@ -103,9 +117,12 @@ public class Set<T> {
     }
 
     /** Difference: elements in this set but not in {@code other}. */
-    public Set<T> difference(Set<T> other) {
-        Set<T> result = new Set<>(table.getCapacity());
-        for (T element : this.toList()) {
+    @Override
+    public HashSet<T> difference(Set<T> other) {
+        HashSet<T> result = new HashSet<>();
+        List<T> thisElements = this.toList();
+        for (int i = 0; i < thisElements.size(); i++) {
+            T element = thisElements.get(i);
             if (!other.contains(element)) {
                 result.add(element);
             }
@@ -114,9 +131,11 @@ public class Set<T> {
     }
 
     /** Returns {@code true} if every element of this set is also in {@code other}. */
+    @Override
     public boolean isSubsetOf(Set<T> other) {
-        for (T element : this.toList()) {
-            if (!other.contains(element)) {
+        List<T> thisElements = this.toList();
+        for (int i = 0; i < thisElements.size(); i++) {
+            if (!other.contains(thisElements.get(i))) {
                 return false;
             }
         }
@@ -124,7 +143,16 @@ public class Set<T> {
     }
 
     /** Prints the elements of the set (demo/evidence aid). */
+    @Override
     public void display() {
-        System.out.println("Set" + table.keySet());
+        List<T> elements = table.keySet();
+        System.out.print("Set{");
+        for (int i = 0; i < elements.size(); i++) {
+            System.out.print(elements.get(i));
+            if (i < elements.size() - 1) {
+                System.out.print(", ");
+            }
+        }
+        System.out.println("}");
     }
 }

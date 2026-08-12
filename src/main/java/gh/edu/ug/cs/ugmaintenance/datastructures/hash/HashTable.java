@@ -1,7 +1,7 @@
-package gh.edu.ug.cs.ugmaintenance.datastructures.hashtable;
+package gh.edu.ug.cs.ugmaintenance.datastructures.hash;
 
-import java.util.ArrayList;
-import java.util.List;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
+import gh.edu.ug.cs.ugmaintenance.datastructures.array.DynamicArray;
 
 /**
  * A custom hash table (key-value store) implemented from scratch using
@@ -204,7 +204,7 @@ public class HashTable<K, V> {
         Entry<K, V>[] oldTable = table;
         capacity = newCapacity;
         table = (Entry<K, V>[]) new Entry[newCapacity];
-        size = 0;
+
         for (Entry<K, V> head : oldTable) {
             Entry<K, V> current = head;
             while (current != null) {
@@ -212,7 +212,6 @@ public class HashTable<K, V> {
                 int index = indexFor(current.key);
                 current.next = table[index];
                 table[index] = current;
-                size++;
                 current = next;
             }
         }
@@ -293,7 +292,7 @@ public class HashTable<K, V> {
 
     /** All keys currently in the table. */
     public List<K> keySet() {
-        List<K> keys = new ArrayList<>();
+        List<K> keys = new DynamicArray<>();
         for (Entry<K, V> head : table) {
             Entry<K, V> current = head;
             while (current != null) {
@@ -306,7 +305,7 @@ public class HashTable<K, V> {
 
     /** All values currently in the table. */
     public List<V> values() {
-        List<V> values = new ArrayList<>();
+        List<V> values = new DynamicArray<>();
         for (Entry<K, V> head : table) {
             Entry<K, V> current = head;
             while (current != null) {

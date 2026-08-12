@@ -6,10 +6,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
+import gh.edu.ug.cs.ugmaintenance.datastructures.array.DynamicArray;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 import gh.edu.ug.cs.ugmaintenance.models.Technician;
 
 public class TechnicianRepository extends BaseRepository implements CrudRepository<Technician, Integer> {
@@ -118,7 +118,7 @@ public class TechnicianRepository extends BaseRepository implements CrudReposito
     @Override
     public List<Technician> findAll() {
         String sql = "SELECT * FROM technicians";
-        List<Technician> technicians = new ArrayList<>();
+        List<Technician> technicians = new DynamicArray<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
@@ -136,7 +136,7 @@ public class TechnicianRepository extends BaseRepository implements CrudReposito
 
     public List<Technician> findAvailableByCategory(int categoryId) {
         String sql = "SELECT * FROM technicians WHERE category_id = ? AND availability_status = true";
-        List<Technician> technicians = new ArrayList<>();
+        List<Technician> technicians = new DynamicArray<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -156,7 +156,7 @@ public class TechnicianRepository extends BaseRepository implements CrudReposito
 
     public List<Technician> findAvailableTechnicians() {
         String sql = "SELECT * FROM technicians WHERE availability_status = true";
-        List<Technician> technicians = new ArrayList<>();
+        List<Technician> technicians = new DynamicArray<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
@@ -174,7 +174,7 @@ public class TechnicianRepository extends BaseRepository implements CrudReposito
 
     public List<Technician> findByCategory(int categoryId) {
         String sql = "SELECT * FROM technicians WHERE category_id = ?";
-        List<Technician> technicians = new ArrayList<>();
+        List<Technician> technicians = new DynamicArray<>();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {

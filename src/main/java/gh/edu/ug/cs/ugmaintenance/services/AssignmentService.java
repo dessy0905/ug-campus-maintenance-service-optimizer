@@ -5,12 +5,12 @@ import gh.edu.ug.cs.ugmaintenance.models.Technician;
 import gh.edu.ug.cs.ugmaintenance.models.TechnicianAssignment;
 import gh.edu.ug.cs.ugmaintenance.models.enums.AssignmentStatus;
 import gh.edu.ug.cs.ugmaintenance.models.enums.RequestStatus;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 import gh.edu.ug.cs.ugmaintenance.repositories.ServiceRequestRepository;
 import gh.edu.ug.cs.ugmaintenance.repositories.TechnicianAssignmentRepository;
 import gh.edu.ug.cs.ugmaintenance.repositories.TechnicianRepository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 public class AssignmentService {

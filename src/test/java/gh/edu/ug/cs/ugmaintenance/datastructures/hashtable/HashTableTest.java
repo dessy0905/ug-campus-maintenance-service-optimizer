@@ -1,5 +1,8 @@
 package gh.edu.ug.cs.ugmaintenance.datastructures.hashtable;
 
+import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashTable;
+import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashMap;
+import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashSet;
 import gh.edu.ug.cs.ugmaintenance.models.Location;
 import gh.edu.ug.cs.ugmaintenance.models.enums.LocationType;
 import org.junit.Test;
@@ -283,7 +286,7 @@ public class HashTableTest {
 
     @Test
     public void testSetAddContains() {
-        Set<String> set = new Set<>();
+        HashSet<String> set = new HashSet<>();
         assertTrue(set.add("Kwame"));
         assertTrue(set.add("Ama"));
         assertTrue(set.contains("Kwame"));
@@ -294,7 +297,7 @@ public class HashTableTest {
 
     @Test
     public void testSetRejectsDuplicates() {
-        Set<String> set = new Set<>();
+        HashSet<String> set = new HashSet<>();
         assertTrue(set.add("Kwame"));
         assertFalse(set.add("Kwame")); // duplicate
         assertEquals(1, set.size());
@@ -302,7 +305,7 @@ public class HashTableTest {
 
     @Test
     public void testSetRemove() {
-        Set<String> set = new Set<>();
+        HashSet<String> set = new HashSet<>();
         set.add("Kwame");
         set.add("Ama");
         assertTrue(set.remove("Kwame"));
@@ -313,14 +316,14 @@ public class HashTableTest {
 
     @Test
     public void testSetUnion() {
-        Set<Integer> a = new Set<>();
+        HashSet<Integer> a = new HashSet<>();
         a.add(1);
         a.add(2);
-        Set<Integer> b = new Set<>();
+        HashSet<Integer> b = new HashSet<>();
         b.add(2);
         b.add(3);
 
-        Set<Integer> union = a.union(b);
+        HashSet<Integer> union = a.union(b);
         assertEquals(3, union.size());
         assertTrue(union.contains(1));
         assertTrue(union.contains(2));
@@ -329,16 +332,16 @@ public class HashTableTest {
 
     @Test
     public void testSetIntersection() {
-        Set<Integer> a = new Set<>();
+        HashSet<Integer> a = new HashSet<>();
         a.add(1);
         a.add(2);
         a.add(3);
-        Set<Integer> b = new Set<>();
+        HashSet<Integer> b = new HashSet<>();
         b.add(2);
         b.add(3);
         b.add(4);
 
-        Set<Integer> intersection = a.intersection(b);
+        HashSet<Integer> intersection = a.intersection(b);
         assertEquals(2, intersection.size());
         assertTrue(intersection.contains(2));
         assertTrue(intersection.contains(3));
@@ -347,14 +350,14 @@ public class HashTableTest {
 
     @Test
     public void testSetDifference() {
-        Set<Integer> a = new Set<>();
+        HashSet<Integer> a = new HashSet<>();
         a.add(1);
         a.add(2);
         a.add(3);
-        Set<Integer> b = new Set<>();
+        HashSet<Integer> b = new HashSet<>();
         b.add(2);
 
-        Set<Integer> difference = a.difference(b);
+        HashSet<Integer> difference = a.difference(b);
         assertEquals(2, difference.size());
         assertTrue(difference.contains(1));
         assertTrue(difference.contains(3));
@@ -363,10 +366,10 @@ public class HashTableTest {
 
     @Test
     public void testSetIsSubsetOf() {
-        Set<Integer> a = new Set<>();
+        HashSet<Integer> a = new HashSet<>();
         a.add(1);
         a.add(2);
-        Set<Integer> b = new Set<>();
+        HashSet<Integer> b = new HashSet<>();
         b.add(1);
         b.add(2);
         b.add(3);
@@ -381,7 +384,7 @@ public class HashTableTest {
 
     @Test
     public void testSetEmptyBoundary() {
-        Set<String> set = new Set<>();
+        HashSet<String> set = new HashSet<>();
         assertTrue(set.isEmpty());
         assertEquals(0, set.size());
         assertFalse(set.contains("anything"));
@@ -390,12 +393,12 @@ public class HashTableTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testSetNullElementThrows() {
-        new Set<String>().add(null);
+        new HashSet<String>().add(null);
     }
 
     @Test
     public void testSetManyElements() {
-        Set<Integer> set = new Set<>();
+        HashSet<Integer> set = new HashSet<>();
         for (int i = 0; i < 1_000; i++) {
             set.add(i);
         }
@@ -411,7 +414,7 @@ public class HashTableTest {
 
     @Test
     public void testMapPutGetRemove() {
-        Map<String, String> map = new Map<>();
+        HashMap<String, String> map = new HashMap<>();
         assertNull(map.put("Kwame", "Toyota Hilux"));
         assertEquals("Toyota Hilux", map.get("Kwame"));
         assertEquals("Toyota Hilux", map.remove("Kwame"));
@@ -421,7 +424,7 @@ public class HashTableTest {
 
     @Test
     public void testMapGetOrDefault() {
-        Map<String, Integer> map = new Map<>();
+        HashMap<String, Integer> map = new HashMap<>();
         map.put("hall", 102);
         assertEquals(Integer.valueOf(102), map.getOrDefault("hall", -1));
         assertEquals(Integer.valueOf(-1), map.getOrDefault("missing", -1));
@@ -429,7 +432,7 @@ public class HashTableTest {
 
     @Test
     public void testMapPutIfAbsent() {
-        Map<String, String> map = new Map<>();
+        HashMap<String, String> map = new HashMap<>();
         map.put("gate", "UG Main Gate");
         // Existing key is not overwritten.
         assertEquals("UG Main Gate", map.putIfAbsent("gate", "Annex"));
@@ -441,7 +444,7 @@ public class HashTableTest {
 
     @Test
     public void testMapContainsKeyValue() {
-        Map<String, String> map = new Map<>();
+        HashMap<String, String> map = new HashMap<>();
         map.put("hall", "Legon Hall");
         assertTrue(map.containsKey("hall"));
         assertFalse(map.containsKey("lib"));
@@ -451,7 +454,7 @@ public class HashTableTest {
 
     @Test
     public void testMapKeySetAndValues() {
-        Map<String, Integer> map = new Map<>();
+        HashMap<String, Integer> map = new HashMap<>();
         map.put("a", 1);
         map.put("b", 2);
         assertEquals(2, map.keySet().size());
@@ -462,7 +465,7 @@ public class HashTableTest {
 
     @Test
     public void testMapClear() {
-        Map<String, String> map = new Map<>();
+        HashMap<String, String> map = new HashMap<>();
         map.put("a", "1");
         map.put("b", "2");
         map.clear();
@@ -476,16 +479,16 @@ public class HashTableTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testMapNullKeyPutThrows() {
-        new Map<String, String>().put(null, "value");
+        new HashMap<String, String>().put(null, "value");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testMapNullKeyGetThrows() {
-        new Map<String, String>().get(null);
+        new HashMap<String, String>().get(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testMapNullKeyRemoveThrows() {
-        new Map<String, String>().remove(null);
+        new HashMap<String, String>().remove(null);
     }
 }
