@@ -72,8 +72,6 @@ src
 - Graph
 - Disjoint Set
 
----
-
 ## Algorithms
 
 ### Searching

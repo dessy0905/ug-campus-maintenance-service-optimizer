@@ -1,77 +1,139 @@
 package gh.edu.ug.cs.ugmaintenance.models;
 
-import java.util.Objects;
+import java.time.LocalDateTime;
 
-public final class ServiceRequest {
-    private final int repairHours;
-    private final String urgencyLevel;
-    private final int urgencyScore;
+import gh.edu.ug.cs.ugmaintenance.models.enums.RequestStatus;
 
-    public ServiceRequest(int repairHours, String urgencyLevel) {
-        if (repairHours <= 0) {
-            throw new IllegalArgumentException("Repair hours must be greater than zero.");
-        }
-        if (urgencyLevel == null) {
-            throw new IllegalArgumentException("Urgency level must not be null.");
-        }
+public class ServiceRequest {
+     private int requestId;
+    private int userId;
+    private int locationId;
+    private int categoryId;
+    private String requestTitle;
+    private String description;
+    private int urgencyLevel;
+    private RequestStatus status;
+    private LocalDateTime requestDate;
+    private LocalDateTime completionDate;
 
-        this.repairHours = repairHours;
+    public ServiceRequest() {
+    }
+
+    public ServiceRequest(int requestId,
+                          int userId,
+                          int locationId,
+                          int categoryId,
+                          String requestTitle,
+                          String description,
+                          int urgencyLevel,
+                          RequestStatus status,
+                          LocalDateTime requestDate,
+                          LocalDateTime completionDate) {
+
+        this.requestId = requestId;
+        this.userId = userId;
+        this.locationId = locationId;
+        this.categoryId = categoryId;
+        this.requestTitle = requestTitle;
+        this.description = description;
         this.urgencyLevel = urgencyLevel;
-        this.urgencyScore = mapUrgencyToScore(urgencyLevel);
+        this.status = status;
+        this.requestDate = requestDate;
+        this.completionDate = completionDate;
     }
 
-    private static int mapUrgencyToScore(String urgencyLevel) {
-        switch (urgencyLevel.toLowerCase()) {
-            case "critical":
-                return 4;
-            case "high":
-                return 3;
-            case "medium":
-                return 2;
-            case "low":
-                return 1;
-            default:
-                throw new IllegalArgumentException("Unknown urgency level: " + urgencyLevel);
-        }
+    public int getRequestId() {
+        return requestId;
     }
 
-    public int getRepairHours() {
-        return repairHours;
+    public void setRequestId(int requestId) {
+        this.requestId = requestId;
     }
 
-    public String getUrgencyLevel() {
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public int getLocationId() {
+        return locationId;
+    }
+
+    public void setLocationId(int locationId) {
+        this.locationId = locationId;
+    }
+
+    public int getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getRequestTitle() {
+        return requestTitle;
+    }
+
+    public void setRequestTitle(String requestTitle) {
+        this.requestTitle = requestTitle;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getUrgencyLevel() {
         return urgencyLevel;
     }
 
-    public int getUrgencyScore() {
-        return urgencyScore;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
+    public void setUrgencyLevel(int urgencyLevel) {
+        if (urgencyLevel < 1 || urgencyLevel > 5) {
+            throw new IllegalArgumentException(
+                    "Urgency level must be between 1 and 5."
+            );
         }
-        if (!(obj instanceof ServiceRequest)) {
-            return false;
-        }
-        ServiceRequest other = (ServiceRequest) obj;
-        return repairHours == other.repairHours
-                && urgencyScore == other.urgencyScore
-                && Objects.equals(urgencyLevel, other.urgencyLevel);
+        this.urgencyLevel = urgencyLevel;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(repairHours, urgencyLevel, urgencyScore);
+    public RequestStatus getStatus() {
+        return status;
     }
 
+    public void setStatus(RequestStatus status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getRequestDate() {
+        return requestDate;
+    }
+
+    public void setRequestDate(LocalDateTime requestDate) {
+        this.requestDate = requestDate;
+    }
+
+    public LocalDateTime getCompletionDate() {
+        return completionDate;
+    }
+
+    public void setCompletionDate(LocalDateTime completionDate) {
+        this.completionDate = completionDate;
+    }
+    
     @Override
     public String toString() {
         return "ServiceRequest{" +
-                "repairHours=" + repairHours +
-                ", urgencyLevel='" + urgencyLevel + '\'' +
-                ", urgencyScore=" + urgencyScore +
+                "requestId=" + requestId +
+                ", requestTitle='" + requestTitle + '\'' +
+                ", urgencyLevel=" + urgencyLevel +
+                ", status=" + status +
                 '}';
     }
 }
