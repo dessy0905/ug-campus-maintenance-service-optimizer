@@ -1,6 +1,9 @@
 package gh.edu.ug.cs.ugmaintenance.datastructures;
 
 import gh.edu.ug.cs.ugmaintenance.datastructures.queue.PriorityQueue;
+import java.time.LocalDateTime;
+
+import gh.edu.ug.cs.ugmaintenance.models.ServiceRequest;
 
 public class PriorityQueueTest {
 
@@ -16,6 +19,7 @@ public class PriorityQueueTest {
         testPriorityOrder();
         testSize();
         testEmptyQueue();
+        testServiceRequestPriority();
 
         System.out.println();
         System.out.println("All Priority Queue tests passed!");
@@ -204,4 +208,48 @@ public class PriorityQueueTest {
         System.out.println("Empty queue test passed.");
         System.out.println();
     }
+
+    
+    private static void testServiceRequestPriority() {
+
+    System.out.println("--- Test 7: ServiceRequest Priority ---");
+
+    PriorityQueue<ServiceRequest> queue =
+            new PriorityQueue<>();
+
+    ServiceRequest normalRequest = new ServiceRequest(
+            1, 1, 1, 1,
+            "Normal request",
+            "Test request",
+            3,
+            null,
+            LocalDateTime.now(),
+            null
+    );
+
+    ServiceRequest criticalRequest = new ServiceRequest(
+            2, 1, 1, 1,
+            "Critical request",
+            "Test request",
+            5,
+            null,
+            LocalDateTime.now(),
+            null
+    );
+
+    queue.offer(normalRequest);
+    queue.offer(criticalRequest);
+
+    ServiceRequest result = queue.poll();
+
+    if (result != criticalRequest) {
+        throw new RuntimeException(
+                "ServiceRequest priority test failed."
+        );
+    }
+
+    System.out.println("ServiceRequest priority test passed.");
+    System.out.println();
+}
+
 }

@@ -1,8 +1,10 @@
 package gh.edu.ug.cs.ugmaintenance.datastructures.queue;
 
 import gh.edu.ug.cs.ugmaintenance.datastructures.array.DynamicArray;
+import gh.edu.ug.cs.ugmaintenance.models.ServiceRequest;
+import gh.edu.ug.cs.ugmaintenance.services.PriorityCalculator;
 
-public class PriorityQueue<T extends Comparable<T>> {
+public class PriorityQueue<T>  {
 
     private final DynamicArray<T> heap;
 
@@ -10,6 +12,31 @@ public class PriorityQueue<T extends Comparable<T>> {
         this.heap = new DynamicArray<>();
     }
 
+private boolean higherPriority(T first, T second) {
+
+    if (first instanceof ServiceRequest
+           && second instanceof ServiceRequest) {
+
+            ServiceRequest firstRequest = (ServiceRequest) first;
+            ServiceRequest secondRequest = (ServiceRequest) second;
+
+            double firstScore =
+                    PriorityCalculator.calculateScore(firstRequest);
+
+            double secondScore = 
+                    PriorityCalculator.calculateScore(secondRequest);
+                    
+                    
+            if (firstScore != secondScore) {
+                return firstScore > secondScore;
+            } 
+            
+            return firstRequest.getUrgencyLevel()
+                    > secondRequest.getUrgencyLevel();
+           }
+    
+    return ((Comparable<T>) first).compareTo(second) > 0;       
+}    
     /**
      * Adds an element to the priority queue.
      * Higher values have higher priority.
@@ -93,7 +120,7 @@ public class PriorityQueue<T extends Comparable<T>> {
             T parent = heap.get(parentIndex);
 
             // Parent already has higher/equal priority
-            if (current.compareTo(parent) <= 0) {
+            if (!higherPriority(current, parent)) {
                 break;
             }
 
@@ -123,16 +150,14 @@ public class PriorityQueue<T extends Comparable<T>> {
 
             // Check left child
             if (leftChild < size
-                    && heap.get(leftChild)
-                    .compareTo(heap.get(largest)) > 0) {
+                    && higherPriority(heap.get(leftChild), heap.get(largest))) {
 
                 largest = leftChild;
             }
 
             // Check right child
             if (rightChild < size
-                    && heap.get(rightChild)
-                    .compareTo(heap.get(largest)) > 0) {
+                    && higherPriority(heap.get(rightChild), heap.get(largest))) {
 
                 largest = rightChild;
             }
