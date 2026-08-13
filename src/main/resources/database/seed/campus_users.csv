@@ -1,9 +1,9 @@
 id,full_name,email,phone_number,role,created_at,updated_at
-1,Kwame Asiedu,kwame@ug.edu.gh,0200000001,Student,2026-01-10 11:00:00,
-2,Afia Boateng,afia@ug.edu.gh,0200000002,Lecturer,2026-01-10 11:05:00,
-3,Michael Addo,michael@ug.edu.gh,0200000003,Maintenance Officer,2026-01-10 11:10:00,
-4,Grace Owusu,grace@ug.edu.gh,0200000004,ICT Staff,2026-01-10 11:15:00,
-5,Nana Yaw,nana@ug.edu.gh,0200000005,Security Officer,2026-01-10 11:20:00,
-6,Ruth Darko,ruth@ug.edu.gh,0200000006,Administrator,2026-01-10 11:25:00,
-7,Selorm Tetteh,selorm@ug.edu.gh,0200000007,Student,2026-01-10 11:30:00,
-8,Evelyn Ansah,evelyn@ug.edu.gh,0200000008,Lecturer,2026-01-10 11:35:00
+1,Kwame Asiedu,Asiedukwame@ug.edu.gh,0243422011,Student,2026-01-10 11:00:00,
+2,Afia Boateng,afiaBoat@ug.edu.gh,0253422021,Lecturer,2026-01-10 11:05:00,
+3,Michael Addo,michael@ug.edu.gh,0244422033,Maintenance Officer,2026-01-10 11:10:00,
+4,Grace Owusu,graceowusu@ug.edu.gh,0243422044,ICT Staff,2026-01-10 11:15:00,
+5,Nana Yaw,nana77Yaw@ug.edu.gh,0543422025,Security Officer,2026-01-10 11:20:00,
+6,Ruth Darko,ruthyDar@ug.edu.gh,0553422016,Administrator,2026-01-10 11:25:00,
+7,Selorm Tetteh,selormTT3@ug.edu.gh,0244000007,Student,2026-01-10 11:30:00,
+8,Evelyn Ansah,evelyn88@ug.edu.gh,0244000228,Lecturer,2026-01-10 11:35:00
