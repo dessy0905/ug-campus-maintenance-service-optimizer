@@ -1,6 +1,7 @@
 package gh.edu.ug.cs.ugmaintenance.services;
 
 import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
+import gh.edu.ug.cs.ugmaintenance.datastructures.queue.PriorityQueue;
 import gh.edu.ug.cs.ugmaintenance.models.ServiceRequest;
 import gh.edu.ug.cs.ugmaintenance.models.enums.RequestStatus;
 import gh.edu.ug.cs.ugmaintenance.repositories.ServiceRequestRepository;
@@ -11,9 +12,11 @@ import java.util.Optional;
 
 public class ServiceRequestService {
         private final ServiceRequestRepository repository;
+        private final PriorityQueue<ServiceRequest> priorityQueue;
 
     public ServiceRequestService() {
         this.repository = new ServiceRequestRepository();
+        this.priorityQueue = new PriorityQueue<>();
     }
 
         private void validateRequest(ServiceRequest request) {
@@ -35,6 +38,8 @@ public class ServiceRequestService {
 
             request.setStatus(RequestStatus.PENDING);
             request.setRequestDate(LocalDateTime.now());
+
+            priorityQueue.offer(request);
 
             return repository.save(request);
         }
@@ -70,6 +75,10 @@ public class ServiceRequestService {
 
         public List<ServiceRequest> getPendingRequests() {
             return repository.findPendingRequests();
+        }
+
+        public ServiceRequest getNextPriorityRequest() {
+            return priorityQueue.poll();
         }
 
         public List<ServiceRequest> getRequestsByPriority(int priority) {
