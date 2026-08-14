@@ -1,18 +1,25 @@
 package gh.edu.ug.cs.ugmaintenance.datastructures.bst;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.LinkedList;
 
 /**
- * Binary Search Tree for managing campus maintenance service requests.
+ * Binary Search Tree for storing campus maintenance
+ * service requests.
  *
- * The tree is ordered using the service request ID.
+ * The request ID is used as the BST key.
  *
- * Left subtree  -> smaller request IDs
- * Right subtree -> larger request IDs
+ * Smaller request IDs are stored in the left subtree.
+ * Larger request IDs are stored in the right subtree.
+ * Duplicate request IDs are not allowed.
  */
 public class BinarySearchTree {
+
+    // =====================================================
+    // FIELDS
+    // =====================================================
 
     private ServiceRequestNode root;
     private int size;
@@ -30,186 +37,94 @@ public class BinarySearchTree {
     // INSERT
     // =====================================================
 
-    /**
-     * Inserts a new service request into the BST.
-     *
-     * @return true if insertion was successful
-     * @return false if the request ID already exists
-     */
     public boolean insert(
             int requestId,
             int userId,
             int locationId,
-            int categoryId,
-            String requestTitle,
+            int technicianId,
+            String issueType,
             String description,
             String urgencyLevel,
             String status,
-            LocalDateTime requestDate,
-            LocalDateTime completionDate) {
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
 
+        ServiceRequestNode newNode =
+                new ServiceRequestNode(
+                        requestId,
+                        userId,
+                        locationId,
+                        technicianId,
+                        issueType,
+                        description,
+                        urgencyLevel,
+                        status,
+                        createdAt,
+                        updatedAt
+                );
+
+        // If tree is empty, new node becomes root.
         if (root == null) {
-
-            root = new ServiceRequestNode(
-                    requestId,
-                    userId,
-                    locationId,
-                    categoryId,
-                    requestTitle,
-                    description,
-                    urgencyLevel,
-                    status,
-                    requestDate,
-                    completionDate
-            );
-
+            root = newNode;
             size++;
             return true;
         }
 
-        return insertHelper(
-                root,
-                requestId,
-                userId,
-                locationId,
-                categoryId,
-                requestTitle,
-                description,
-                urgencyLevel,
-                status,
-                requestDate,
-                completionDate
-        );
-    }
+        ServiceRequestNode current = root;
 
-    private boolean insertHelper(
-            ServiceRequestNode node,
-            int requestId,
-            int userId,
-            int locationId,
-            int categoryId,
-            String requestTitle,
-            String description,
-            String urgencyLevel,
-            String status,
-            LocalDateTime requestDate,
-            LocalDateTime completionDate) {
+        while (true) {
 
-        // Go left if the new request ID is smaller
-        if (requestId < node.getRequestId()) {
-
-            if (node.left == null) {
-
-                node.left = new ServiceRequestNode(
-                        requestId,
-                        userId,
-                        locationId,
-                        categoryId,
-                        requestTitle,
-                        description,
-                        urgencyLevel,
-                        status,
-                        requestDate,
-                        completionDate
-                );
-
-                size++;
-                return true;
+            // Duplicate IDs are not allowed.
+            if (requestId == current.getRequestId()) {
+                return false;
             }
 
-            return insertHelper(
-                    node.left,
-                    requestId,
-                    userId,
-                    locationId,
-                    categoryId,
-                    requestTitle,
-                    description,
-                    urgencyLevel,
-                    status,
-                    requestDate,
-                    completionDate
-            );
-        }
+            // Smaller IDs go left.
+            if (requestId < current.getRequestId()) {
 
-        // Go right if the new request ID is larger
-        if (requestId > node.getRequestId()) {
+                if (current.getLeft() == null) {
+                    current.setLeft(newNode);
+                    size++;
+                    return true;
+                }
 
-            if (node.right == null) {
+                current = current.getLeft();
 
-                node.right = new ServiceRequestNode(
-                        requestId,
-                        userId,
-                        locationId,
-                        categoryId,
-                        requestTitle,
-                        description,
-                        urgencyLevel,
-                        status,
-                        requestDate,
-                        completionDate
-                );
+            } else {
 
-                size++;
-                return true;
+                // Larger IDs go right.
+                if (current.getRight() == null) {
+                    current.setRight(newNode);
+                    size++;
+                    return true;
+                }
+
+                current = current.getRight();
             }
-
-            return insertHelper(
-                    node.right,
-                    requestId,
-                    userId,
-                    locationId,
-                    categoryId,
-                    requestTitle,
-                    description,
-                    urgencyLevel,
-                    status,
-                    requestDate,
-                    completionDate
-            );
         }
-
-        // Duplicate request ID
-        System.out.println(
-                "Duplicate request ID: " + requestId
-        );
-
-        return false;
     }
 
     // =====================================================
     // SEARCH
     // =====================================================
 
-    /**
-     * Searches for a service request using its ID.
-     *
-     * Average time complexity: O(log n)
-     * Worst-case time complexity: O(n)
-     */
     public ServiceRequestNode search(int requestId) {
 
         ServiceRequestNode current = root;
 
         while (current != null) {
 
-            // Request found
             if (requestId == current.getRequestId()) {
                 return current;
             }
 
-            // Search left subtree
             if (requestId < current.getRequestId()) {
-                current = current.left;
-            }
-
-            // Search right subtree
-            else {
-                current = current.right;
+                current = current.getLeft();
+            } else {
+                current = current.getRight();
             }
         }
 
-        // Request not found
         return null;
     }
 
@@ -217,31 +132,27 @@ public class BinarySearchTree {
     // UPDATE
     // =====================================================
 
-    /**
-     * Updates information about an existing service request.
-     *
-     * The request ID cannot be changed because it determines
-     * the position of the node in the BST.
-     */
     public boolean update(
             int requestId,
-            String requestTitle,
+            String issueType,
             String description,
             String urgencyLevel,
             String status,
-            LocalDateTime completionDate) {
+            LocalDateTime updatedAt) {
 
-        ServiceRequestNode request = search(requestId);
+        ServiceRequestNode request =
+                search(requestId);
 
+        // Request does not exist.
         if (request == null) {
             return false;
         }
 
-        request.setRequestTitle(requestTitle);
+        request.setIssueType(issueType);
         request.setDescription(description);
         request.setUrgencyLevel(urgencyLevel);
         request.setStatus(status);
-        request.setCompletionDate(completionDate);
+        request.setUpdatedAt(updatedAt);
 
         return true;
     }
@@ -250,144 +161,277 @@ public class BinarySearchTree {
     // DELETE
     // =====================================================
 
-    /**
-     * Deletes a service request from the BST.
-     *
-     * Handles:
-     *
-     * 1. Leaf node
-     * 2. Node with one child
-     * 3. Node with two children
-     */
     public boolean delete(int requestId) {
 
-        if (search(requestId) == null) {
+        ServiceRequestNode parent = null;
+        ServiceRequestNode current = root;
 
-            System.out.println(
-                    "Request #" + requestId + " not found."
-            );
+        // Find the node.
+        while (current != null &&
+                current.getRequestId() != requestId) {
 
+            parent = current;
+
+            if (requestId < current.getRequestId()) {
+                current = current.getLeft();
+            } else {
+                current = current.getRight();
+            }
+        }
+
+        // Request was not found.
+        if (current == null) {
             return false;
         }
 
-        root = deleteHelper(root, requestId);
+        // -------------------------------------------------
+        // CASE 1: LEAF NODE
+        // -------------------------------------------------
+
+        if (current.getLeft() == null &&
+                current.getRight() == null) {
+
+            if (parent == null) {
+                // The root is the only node.
+                root = null;
+            } else if (parent.getLeft() == current) {
+                parent.setLeft(null);
+            } else {
+                parent.setRight(null);
+            }
+        }
+
+        // -------------------------------------------------
+        // CASE 2: ONLY RIGHT CHILD
+        // -------------------------------------------------
+
+        else if (current.getLeft() == null) {
+
+            if (parent == null) {
+                root = current.getRight();
+            } else if (parent.getLeft() == current) {
+                parent.setLeft(current.getRight());
+            } else {
+                parent.setRight(current.getRight());
+            }
+        }
+
+        // -------------------------------------------------
+        // CASE 3: ONLY LEFT CHILD
+        // -------------------------------------------------
+
+        else if (current.getRight() == null) {
+
+            if (parent == null) {
+                root = current.getLeft();
+            } else if (parent.getLeft() == current) {
+                parent.setLeft(current.getLeft());
+            } else {
+                parent.setRight(current.getLeft());
+            }
+        }
+
+        // -------------------------------------------------
+        // CASE 4: TWO CHILDREN
+        // -------------------------------------------------
+
+        else {
+
+            /*
+             * Find the in-order successor.
+             *
+             * The in-order successor is the smallest
+             * node in the right subtree.
+             */
+            ServiceRequestNode successorParent = current;
+            ServiceRequestNode successor =
+                    current.getRight();
+
+            while (successor.getLeft() != null) {
+                successorParent = successor;
+                successor = successor.getLeft();
+            }
+
+            // Copy successor's data into current node.
+            copyData(successor, current);
+
+            // Remove successor from its old position.
+            if (successorParent.getLeft() == successor) {
+                successorParent.setLeft(
+                        successor.getRight()
+                );
+            } else {
+                successorParent.setRight(
+                        successor.getRight()
+                );
+            }
+        }
 
         size--;
-
         return true;
     }
 
-    private ServiceRequestNode deleteHelper(
-            ServiceRequestNode node,
-            int requestId) {
+    // =====================================================
+    // COPY NODE DATA
+    // =====================================================
+
+    private void copyData(
+            ServiceRequestNode source,
+            ServiceRequestNode destination) {
+
+        destination.setRequestId(
+                source.getRequestId()
+        );
+
+        destination.setUserId(
+                source.getUserId()
+        );
+
+        destination.setLocationId(
+                source.getLocationId()
+        );
+
+        destination.setTechnicianId(
+                source.getTechnicianId()
+        );
+
+        destination.setIssueType(
+                source.getIssueType()
+        );
+
+        destination.setDescription(
+                source.getDescription()
+        );
+
+        destination.setUrgencyLevel(
+                source.getUrgencyLevel()
+        );
+
+        destination.setStatus(
+                source.getStatus()
+        );
+
+        destination.setCreatedAt(
+                source.getCreatedAt()
+        );
+
+        destination.setUpdatedAt(
+                source.getUpdatedAt()
+        );
+    }
+
+    // =====================================================
+    // IN-ORDER TRAVERSAL
+    // =====================================================
+
+    public void inOrder() {
+        inOrderRecursive(root);
+    }
+
+    private void inOrderRecursive(
+            ServiceRequestNode node) {
 
         if (node == null) {
-            return null;
+            return;
         }
 
-        // Search left subtree
-        if (requestId < node.getRequestId()) {
+        inOrderRecursive(node.getLeft());
 
-            node.left = deleteHelper(
-                    node.left,
-                    requestId
-            );
+        System.out.println(node);
 
+        inOrderRecursive(node.getRight());
+    }
+
+    // =====================================================
+    // PRE-ORDER TRAVERSAL
+    // =====================================================
+
+    public void preOrder() {
+        preOrderRecursive(root);
+    }
+
+    private void preOrderRecursive(
+            ServiceRequestNode node) {
+
+        if (node == null) {
+            return;
         }
 
-        // Search right subtree
-        else if (requestId > node.getRequestId()) {
+        System.out.println(node);
 
-            node.right = deleteHelper(
-                    node.right,
-                    requestId
-            );
+        preOrderRecursive(node.getLeft());
 
+        preOrderRecursive(node.getRight());
+    }
+
+    // =====================================================
+    // POST-ORDER TRAVERSAL
+    // =====================================================
+
+    public void postOrder() {
+        postOrderRecursive(root);
+    }
+
+    private void postOrderRecursive(
+            ServiceRequestNode node) {
+
+        if (node == null) {
+            return;
         }
 
-        // Node found
-        else {
+        postOrderRecursive(node.getLeft());
 
-            // =================================================
-            // CASE 1: LEAF NODE
-            // =================================================
+        postOrderRecursive(node.getRight());
 
-            if (node.left == null &&
-                    node.right == null) {
+        System.out.println(node);
+    }
 
-                return null;
-            }
+    // =====================================================
+    // GET REQUESTS IN ORDER
+    // =====================================================
 
-            // =================================================
-            // CASE 2: ONLY RIGHT CHILD
-            // =================================================
+    public List<ServiceRequestNode> getRequestsInOrder() {
 
-            if (node.left == null) {
-                return node.right;
-            }
+        // IMPORTANT:
+        // List is an interface, so we instantiate
+        // the concrete LinkedList implementation.
+        List<ServiceRequestNode> requests =
+                new LinkedList<>();
 
-            // =================================================
-            // CASE 2: ONLY LEFT CHILD
-            // =================================================
+        addInOrder(root, requests);
 
-            if (node.right == null) {
-                return node.left;
-            }
+        return requests;
+    }
 
-            // =================================================
-            // CASE 3: TWO CHILDREN
-            // =================================================
+    private void addInOrder(
+            ServiceRequestNode node,
+            List<ServiceRequestNode> requests) {
 
-            /*
-             * Find the smallest node in the right subtree.
-             *
-             * This is called the in-order successor.
-             */
-            ServiceRequestNode successor =
-                    findMinNode(node.right);
-
-            /*
-             * Copy all information from the successor
-             * into the current node.
-             */
-            node.copyFrom(successor);
-
-            /*
-             * Remove the duplicate successor node
-             * from the right subtree.
-             */
-            node.right = deleteHelper(
-                    node.right,
-                    successor.getRequestId()
-            );
+        if (node == null) {
+            return;
         }
 
-        return node;
+        addInOrder(node.getLeft(), requests);
+
+        requests.add(node);
+
+        addInOrder(node.getRight(), requests);
     }
 
     // =====================================================
     // FIND MINIMUM
     // =====================================================
 
-    /**
-     * Returns the service request with the smallest ID.
-     */
     public ServiceRequestNode findMin() {
 
         if (root == null) {
             return null;
         }
 
-        return findMinNode(root);
-    }
+        ServiceRequestNode current = root;
 
-    private ServiceRequestNode findMinNode(
-            ServiceRequestNode node) {
-
-        ServiceRequestNode current = node;
-
-        while (current.left != null) {
-            current = current.left;
+        while (current.getLeft() != null) {
+            current = current.getLeft();
         }
 
         return current;
@@ -397,9 +441,6 @@ public class BinarySearchTree {
     // FIND MAXIMUM
     // =====================================================
 
-    /**
-     * Returns the service request with the largest ID.
-     */
     public ServiceRequestNode findMax() {
 
         if (root == null) {
@@ -408,139 +449,25 @@ public class BinarySearchTree {
 
         ServiceRequestNode current = root;
 
-        while (current.right != null) {
-            current = current.right;
+        while (current.getRight() != null) {
+            current = current.getRight();
         }
 
         return current;
     }
 
     // =====================================================
-    // IN-ORDER TRAVERSAL
-    // =====================================================
-
-    /**
-     * Visits nodes in ascending request ID order.
-     */
-    public void inOrder() {
-        inOrderHelper(root);
-    }
-
-    private void inOrderHelper(
-            ServiceRequestNode node) {
-
-        if (node == null) {
-            return;
-        }
-
-        inOrderHelper(node.left);
-
-        System.out.println(node);
-
-        inOrderHelper(node.right);
-    }
-
-    // =====================================================
-    // PRE-ORDER TRAVERSAL
-    // =====================================================
-
-    /**
-     * Visits the root before its subtrees.
-     */
-    public void preOrder() {
-        preOrderHelper(root);
-    }
-
-    private void preOrderHelper(
-            ServiceRequestNode node) {
-
-        if (node == null) {
-            return;
-        }
-
-        System.out.println(node);
-
-        preOrderHelper(node.left);
-
-        preOrderHelper(node.right);
-    }
-
-    // =====================================================
-    // POST-ORDER TRAVERSAL
-    // =====================================================
-
-    /**
-     * Visits the subtrees before the root.
-     */
-    public void postOrder() {
-        postOrderHelper(root);
-    }
-
-    private void postOrderHelper(
-            ServiceRequestNode node) {
-
-        if (node == null) {
-            return;
-        }
-
-        postOrderHelper(node.left);
-
-        postOrderHelper(node.right);
-
-        System.out.println(node);
-    }
-
-    // =====================================================
-    // GET REQUESTS IN SORTED ORDER
-    // =====================================================
-
-    /**
-     * Returns all service requests sorted by request ID.
-     */
-    public List<ServiceRequestNode> getRequestsInOrder() {
-
-        List<ServiceRequestNode> requests =
-                new ArrayList<>();
-
-        collectInOrder(root, requests);
-
-        return requests;
-    }
-
-    private void collectInOrder(
-            ServiceRequestNode node,
-            List<ServiceRequestNode> requests) {
-
-        if (node == null) {
-            return;
-        }
-
-        collectInOrder(node.left, requests);
-
-        requests.add(node);
-
-        collectInOrder(node.right, requests);
-    }
-
-    // =====================================================
     // SIZE
     // =====================================================
 
-    /**
-     * Returns the number of service requests
-     * currently stored in the BST.
-     */
     public int size() {
         return size;
     }
 
     // =====================================================
-    // IS EMPTY
+    // EMPTY CHECK
     // =====================================================
 
-    /**
-     * Checks whether the BST contains no requests.
-     */
     public boolean isEmpty() {
         return root == null;
     }
@@ -549,12 +476,16 @@ public class BinarySearchTree {
     // CLEAR
     // =====================================================
 
-    /**
-     * Removes all service requests from the BST.
-     */
     public void clear() {
-
         root = null;
         size = 0;
+    }
+
+    // =====================================================
+    // GET ROOT
+    // =====================================================
+
+    public ServiceRequestNode getRoot() {
+        return root;
     }
 }

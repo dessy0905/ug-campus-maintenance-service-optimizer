@@ -2,46 +2,66 @@ package gh.edu.ug.cs.ugmaintenance.datastructures.bst;
 
 import java.time.LocalDateTime;
 
+/**
+ * Node used by the Binary Search Tree.
+ *
+ * Each node represents one maintenance service request.
+ * The request ID is used as the BST key.
+ */
 public class ServiceRequestNode {
+
+    // =====================================================
+    // REQUEST DATA
+    // =====================================================
 
     private int requestId;
     private int userId;
     private int locationId;
-    private int categoryId;
+    private int technicianId;
 
-    private String requestTitle;
+    private String issueType;
     private String description;
     private String urgencyLevel;
     private String status;
 
-    private LocalDateTime requestDate;
-    private LocalDateTime completionDate;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    ServiceRequestNode left;
-    ServiceRequestNode right;
+    // =====================================================
+    // BST LINKS
+    // =====================================================
+
+    private ServiceRequestNode left;
+    private ServiceRequestNode right;
+
+    // =====================================================
+    // CONSTRUCTOR
+    // =====================================================
 
     public ServiceRequestNode(
             int requestId,
             int userId,
             int locationId,
-            int categoryId,
-            String requestTitle,
+            int technicianId,
+            String issueType,
             String description,
             String urgencyLevel,
             String status,
-            LocalDateTime requestDate,
-            LocalDateTime completionDate) {
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
 
         this.requestId = requestId;
         this.userId = userId;
         this.locationId = locationId;
-        this.categoryId = categoryId;
-        this.requestTitle = requestTitle;
+        this.technicianId = technicianId;
+
+        this.issueType = issueType;
         this.description = description;
         this.urgencyLevel = urgencyLevel;
         this.status = status;
-        this.requestDate = requestDate;
-        this.completionDate = completionDate;
+
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
 
         this.left = null;
         this.right = null;
@@ -63,12 +83,12 @@ public class ServiceRequestNode {
         return locationId;
     }
 
-    public int getCategoryId() {
-        return categoryId;
+    public int getTechnicianId() {
+        return technicianId;
     }
 
-    public String getRequestTitle() {
-        return requestTitle;
+    public String getIssueType() {
+        return issueType;
     }
 
     public String getDescription() {
@@ -83,20 +103,44 @@ public class ServiceRequestNode {
         return status;
     }
 
-    public LocalDateTime getRequestDate() {
-        return requestDate;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public LocalDateTime getCompletionDate() {
-        return completionDate;
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public ServiceRequestNode getLeft() {
+        return left;
+    }
+
+    public ServiceRequestNode getRight() {
+        return right;
     }
 
     // =====================================================
     // SETTERS
     // =====================================================
 
-    public void setRequestTitle(String requestTitle) {
-        this.requestTitle = requestTitle;
+    public void setRequestId(int requestId) {
+        this.requestId = requestId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public void setLocationId(int locationId) {
+        this.locationId = locationId;
+    }
+
+    public void setTechnicianId(int technicianId) {
+        this.technicianId = technicianId;
+    }
+
+    public void setIssueType(String issueType) {
+        this.issueType = issueType;
     }
 
     public void setDescription(String description) {
@@ -111,51 +155,34 @@ public class ServiceRequestNode {
         this.status = status;
     }
 
-    public void setCompletionDate(LocalDateTime completionDate) {
-        this.completionDate = completionDate;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public void setLeft(ServiceRequestNode left) {
+        this.left = left;
+    }
+
+    public void setRight(ServiceRequestNode right) {
+        this.right = right;
     }
 
     // =====================================================
-    // COPY DATA
-    // =====================================================
-
-    /*
-     * Used when deleting a node with two children.
-     * The in-order successor's data is copied into
-     * the node being deleted.
-     */
-    void copyFrom(ServiceRequestNode other) {
-
-        this.requestId = other.requestId;
-        this.userId = other.userId;
-        this.locationId = other.locationId;
-        this.categoryId = other.categoryId;
-        this.requestTitle = other.requestTitle;
-        this.description = other.description;
-        this.urgencyLevel = other.urgencyLevel;
-        this.status = other.status;
-        this.requestDate = other.requestDate;
-        this.completionDate = other.completionDate;
-    }
-
-    // =====================================================
-    // TO STRING
+    // DISPLAY
     // =====================================================
 
     @Override
     public String toString() {
-
-        return "ServiceRequest{"
-                + "id=" + requestId
-                + ", userId=" + userId
-                + ", locationId=" + locationId
-                + ", categoryId=" + categoryId
-                + ", title='" + requestTitle + '\''
-                + ", description='" + description + '\''
-                + ", urgency='" + urgencyLevel + '\''
-                + ", status='" + status + '\''
-                + ", requestDate=" + requestDate
-                + ", completionDate=" + completionDate
-                + '}';
+        return "ServiceRequestNode{" +
+                "requestId=" + requestId +
+                ", issueType='" + issueType + '\'' +
+                ", description='" + description + '\'' +
+                ", urgencyLevel='" + urgencyLevel + '\'' +
+                ", status='" + status + '\'' +
+                '}';
     }
 }
