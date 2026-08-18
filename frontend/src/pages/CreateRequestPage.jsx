@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { createRequest } from "../services/api";
 import "../layouts/AppLayout.css";
+import "./CreateRequestPage.css";
 
 const LOCATIONS = [
   "Balme Library",
@@ -65,29 +66,34 @@ function CreateRequestPage() {
 
       {!created ? (
         <form onSubmit={submit} className="create-request-form">
-          <div className="form-row">
-            <label>Title</label>
+          <div className="form-group">
+            <label htmlFor="request-title">Title</label>
             <input
+              id="request-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              placeholder="Brief summary of the issue"
               required
             />
           </div>
 
-          <div className="form-row">
-            <label>Description</label>
+          <div className="form-group">
+            <label htmlFor="request-description">Description</label>
             <textarea
+              id="request-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={5}
+              placeholder="Describe the maintenance issue in detail"
               required
             />
           </div>
 
           <div className="form-grid">
-            <div className="form-row">
-              <label>Location</label>
+            <div className="form-group">
+              <label htmlFor="request-location">Location</label>
               <select
+                id="request-location"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               >
@@ -99,9 +105,10 @@ function CreateRequestPage() {
               </select>
             </div>
 
-            <div className="form-row">
-              <label>Service Category</label>
+            <div className="form-group">
+              <label htmlFor="request-category">Service Category</label>
               <select
+                id="request-category"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
@@ -113,9 +120,10 @@ function CreateRequestPage() {
               </select>
             </div>
 
-            <div className="form-row">
-              <label>Priority</label>
+            <div className="form-group">
+              <label htmlFor="request-priority">Priority</label>
               <select
+                id="request-priority"
                 value={priority}
                 onChange={(e) => setPriority(Number(e.target.value))}
               >
@@ -128,15 +136,11 @@ function CreateRequestPage() {
             </div>
           </div>
 
-          <div style={{ marginTop: 18 }}>
+          <div className="form-actions">
             <button type="submit" disabled={loading}>
-              Submit Request
+              {loading ? "Submitting…" : "Submit Request"}
             </button>
-            <button
-              type="button"
-              style={{ marginLeft: 8 }}
-              onClick={() => navigate(-1)}
-            >
+            <button type="button" onClick={() => navigate(-1)}>
               Cancel
             </button>
           </div>
@@ -147,14 +151,11 @@ function CreateRequestPage() {
           <p>
             Your request has been created with ID <strong>{created.id}</strong>.
           </p>
-          <div style={{ marginTop: 12 }}>
+          <div className="success-actions">
             <button onClick={() => navigate(`/user/requests/${created.id}`)}>
               View Request Details
             </button>
-            <button
-              onClick={() => navigate("/user/my-requests")}
-              style={{ marginLeft: 8 }}
-            >
+            <button onClick={() => navigate("/user/my-requests")}>
               Go to My Requests
             </button>
           </div>
