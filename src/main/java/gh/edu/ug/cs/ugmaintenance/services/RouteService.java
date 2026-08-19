@@ -1,14 +1,17 @@
 package gh.edu.ug.cs.ugmaintenance.services;
 
 import gh.edu.ug.cs.ugmaintenance.datastructures.array.DynamicArray;
+import gh.edu.ug.cs.ugmaintenance.datastructures.graph.Dijkstra;
+import gh.edu.ug.cs.ugmaintenance.datastructures.graph.Graph;
 import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashMap;
-import gh.edu.ug.cs.ugmaintenance.datastructures.hash.Map;
 import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
-import gh.edu.ug.cs.ugmaintenance.datastructures.queue.PriorityQueue;
+
 import java.util.Optional;
 
+import gh.edu.ug.cs.ugmaintenance.models.Location;
 import gh.edu.ug.cs.ugmaintenance.models.Road;
 import gh.edu.ug.cs.ugmaintenance.models.Technician;
+import gh.edu.ug.cs.ugmaintenance.repositories.LocationRepository;
 import gh.edu.ug.cs.ugmaintenance.repositories.RoadRepository;
 import gh.edu.ug.cs.ugmaintenance.repositories.TechnicianRepository;
 
@@ -16,10 +19,12 @@ public class RouteService {
 
     private final RoadRepository roadRepository;
     private final TechnicianRepository technicianRepository;
+    private final LocationRepository locationRepository;
 
     public RouteService() {
         this.roadRepository = new RoadRepository();
         this.technicianRepository = new TechnicianRepository();
+        this.locationRepository = new LocationRepository();
     }
 
     public List<Integer> findShortestRoute(int startLocationId, int endLocationId) {
@@ -31,60 +36,51 @@ public class RouteService {
             return path;
         }
 
-        Map<Integer, List<Road>> adjacency = buildAdjacencyMap();
-        Map<Integer, Double> distances = new HashMap<>();
-        Map<Integer, Integer> previous = new HashMap<>();
-        PriorityQueue<RouteStep> queue = new PriorityQueue<>();
+        Graph graph = buildGraph();
 
-        distances.put(startLocationId, 0.0);
-        queue.offer(new RouteStep(startLocationId, 0.0));
-
-        while (!queue.isEmpty()) {
-            RouteStep current = queue.poll();
-            if (current.distance > distances.getOrDefault(current.locationId, Double.MAX_VALUE)) {
-                continue;
-            }
-
-            if (current.locationId == endLocationId) {
-                break;
-            }
-
-            List<Road> outgoing = adjacency.getOrDefault(current.locationId, new DynamicArray<>());
-            for (int i = 0; i < outgoing.size(); i++) {
-                Road road = outgoing.get(i);
-                int nextLocation = road.getToLocationId();
-                double candidateDistance = current.distance + road.getDistanceKm();
-
-                if (candidateDistance < distances.getOrDefault(nextLocation, Double.MAX_VALUE)) {
-                    distances.put(nextLocation, candidateDistance);
-                    previous.put(nextLocation, current.locationId);
-                    queue.offer(new RouteStep(nextLocation, candidateDistance));
-                }
-            }
-        }
-
-        if (!distances.containsKey(endLocationId)) {
+        if (!graph.containsVertex(startLocationId) || !graph.containsVertex(endLocationId)) {
             return new DynamicArray<>();
         }
 
-        List<Integer> path = new DynamicArray<>();
-        int current = endLocationId;
-        while (current != 0) {
-            path.add(0, current);
-            if (!previous.containsKey(current)) {
-                if (current == startLocationId) {
-                    break;
-                }
-                return new DynamicArray<>();
-            }
-            current = previous.get(current);
+        try {
+            return new Dijkstra(graph).shortestPath(startLocationId, endLocationId);
+        } catch (IllegalArgumentException e) {
+            return new DynamicArray<>();
         }
+    }
 
-        if (path.isEmpty() || path.get(0) != startLocationId) {
+    public List<String> findShortestRouteNames(
+            int startLocationId,
+            int endLocationId) {
+
+        return resolveLocationNames(
+                findShortestRoute(startLocationId, endLocationId)
+        );
+    }
+
+    public String getLocationName(int locationId) {
+        validateLocationId(locationId);
+
+        return locationRepository.findById(locationId)
+                .map(location -> location.getLocationName())
+                .orElse(fallbackLocationName(locationId));
+    }
+
+    public List<String> resolveLocationNames(List<Integer> locationIds) {
+        if (locationIds == null || locationIds.isEmpty()) {
             return new DynamicArray<>();
         }
 
-        return path;
+        HashMap<Integer, String> locationNames = buildLocationNameIndex();
+        List<String> names = new DynamicArray<>();
+
+        for (int i = 0; i < locationIds.size(); i++) {
+            int locationId = locationIds.get(i);
+            String name = locationNames.get(locationId);
+            names.add(name != null ? name : fallbackLocationName(locationId));
+        }
+
+        return names;
     }
 
     public double calculateRouteDistance(int startLocationId, int endLocationId) {
@@ -136,28 +132,79 @@ public class RouteService {
             return Optional.empty();
         }
 
-        // This is the best current implementation without a technician home-location field.
-        // Once a technician location or base station is stored, the route distance can be
-        // used to rank candidates exactly using the graph above.
-        return Optional.of(availableTechnicians.get(0));
+        Graph graph = buildGraph();
+        if (!graph.containsVertex(locationId)) {
+            return Optional.empty();
+        }
+
+        HashMap<Integer, Double> distances = new Dijkstra(graph).shortestDistances(locationId);
+
+        Technician nearestTechnician = null;
+        double shortestDistance = Double.MAX_VALUE;
+
+        for (int i = 0; i < availableTechnicians.size(); i++) {
+            Technician technician = availableTechnicians.get(i);
+            int technicianLocationId = technician.getLocationId();
+
+            if (technicianLocationId <= 0 || !graph.containsVertex(technicianLocationId)) {
+                continue;
+            }
+
+            Double distance = distances.get(technicianLocationId);
+            if (distance == null || distance == Double.MAX_VALUE) {
+                continue;
+            }
+
+            if (distance < shortestDistance) {
+                shortestDistance = distance;
+                nearestTechnician = technician;
+            }
+        }
+
+        return Optional.ofNullable(nearestTechnician);
     }
 
-    private Map<Integer, List<Road>> buildAdjacencyMap() {
-        Map<Integer, List<Road>> adjacency = new HashMap<>();
+    private Graph buildGraph() {
+        Graph graph = new Graph();
         List<Road> roads = roadRepository.findAll();
 
         for (int i = 0; i < roads.size(); i++) {
             Road road = roads.get(i);
-            int key = road.getFromLocationId();
-            List<Road> bucket = adjacency.get(key);
-            if (bucket == null) {
-                bucket = new DynamicArray<>();
-                adjacency.put(key, bucket);
+            if (road == null) {
+                continue;
             }
-            bucket.add(road);
+
+            int fromLocationId = road.getFromLocationId();
+            int toLocationId = road.getToLocationId();
+            double distanceKm = road.getDistanceKm();
+
+            if (fromLocationId <= 0 || toLocationId <= 0 || distanceKm <= 0) {
+                continue;
+            }
+
+            graph.addEdge(fromLocationId, toLocationId, distanceKm);
         }
 
-        return adjacency;
+        return graph;
+    }
+
+    private HashMap<Integer, String> buildLocationNameIndex() {
+        HashMap<Integer, String> locationNames = new HashMap<>();
+        List<Location> locations = locationRepository.findAll();
+
+        for (int i = 0; i < locations.size(); i++) {
+            Location location = locations.get(i);
+            locationNames.put(
+                    location.getLocationId(),
+                    location.getLocationName()
+            );
+        }
+
+        return locationNames;
+    }
+
+    private String fallbackLocationName(int locationId) {
+        return "Location #" + locationId;
     }
 
     private void validateLocationIds(int startLocationId, int endLocationId) {
@@ -171,18 +218,4 @@ public class RouteService {
         }
     }
 
-    private static class RouteStep implements Comparable<RouteStep> {
-        private final int locationId;
-        private final double distance;
-
-        private RouteStep(int locationId, double distance) {
-            this.locationId = locationId;
-            this.distance = distance;
-        }
-
-        @Override
-        public int compareTo(RouteStep other) {
-            return Double.compare(this.distance, other.distance);
-        }
-    }
 }

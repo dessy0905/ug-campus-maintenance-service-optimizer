@@ -92,7 +92,7 @@ export const requests = [
 export const technicians = [
   {
     id: 2,
-    name: "Kofi Boateng",
+    name: "Kwadjo Boateng",
     specialization: "Electrical",
     category: "Electrical",
     phone: "0244001002",
@@ -100,7 +100,7 @@ export const technicians = [
   },
   {
     id: 6,
-    name: "Akua Mensah",
+    name: "Akua Mansah",
     specialization: "Plumbing",
     category: "Plumbing",
     phone: "0244001010",
@@ -108,7 +108,7 @@ export const technicians = [
   },
   {
     id: 8,
-    name: "Nana Yaw",
+    name: "Nana Yaw Osei",
     specialization: "Cleaning",
     category: "Cleaning",
     phone: "0244001020",

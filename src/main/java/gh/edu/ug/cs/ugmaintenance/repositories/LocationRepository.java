@@ -123,6 +123,42 @@ public class LocationRepository extends BaseRepository implements CrudRepository
         return locations;
     }
 
+    public Optional<Location> findByName(String locationName) {
+        if (locationName == null || locationName.isBlank()) {
+            return Optional.empty();
+        }
+
+        String sql = """
+                SELECT * FROM locations
+                WHERE LOWER(location_name) = LOWER(?)
+                   OR LOWER(location_name) LIKE LOWER(?)
+                ORDER BY CASE
+                    WHEN LOWER(location_name) = LOWER(?) THEN 0
+                    ELSE 1
+                END, id
+                LIMIT 1
+                """;
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            String trimmed = locationName.trim();
+            statement.setString(1, trimmed);
+            statement.setString(2, "%" + trimmed + "%");
+            statement.setString(3, trimmed);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return Optional.empty();
+    }
+
     private Location mapRow(ResultSet rs) throws SQLException {
         Location location = new Location();
         location.setLocationId(rs.getInt("id"));

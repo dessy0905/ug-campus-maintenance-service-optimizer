@@ -1,8 +1,8 @@
 package gh.edu.ug.cs.ugmaintenance.datastructures.graph;
 
-import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashMap;
 import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashSet;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 
 public class Graph {
 

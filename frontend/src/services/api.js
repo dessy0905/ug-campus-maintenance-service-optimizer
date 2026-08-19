@@ -1,217 +1,191 @@
-import { users, requests, technicians } from "../data/mockData";
+const BASE_URL = "http://localhost:8081/api";
+const REQUEST_TIMEOUT_MS = 10000;
 
-// const BASE_URL = 'http://localhost:8080/api'; // ready for future Java backend
-const BASE_URL = "http://localhost:8080/api";
+async function request(path, options = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-export async function loginUser(credentials) {
-  await delay(350);
-
-  const user = users.find((item) => item.role === credentials.role);
-  if (!user) {
-    throw new Error("User not found.");
+  let response;
+  try {
+    response = await fetch(`${BASE_URL}${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+      },
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error(
+        "The backend did not respond. Start the Java API and check the database connection.",
+      );
+    }
+    throw new Error(
+      "Cannot reach the backend. Start the Java API on port 8080.",
+    );
+  } finally {
+    clearTimeout(timeout);
   }
 
-  return { ...user, role: user.role };
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.error || "Request failed.");
+  }
+
+  return data;
+}
+
+export async function loginUser(credentials) {
+  return request("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ role: credentials.role }),
+  });
 }
 
 export async function getCurrentUser() {
-  await delay(200);
   const stored = localStorage.getItem("ugcms-user");
   return stored ? JSON.parse(stored) : null;
 }
 
+export async function getLocations() {
+  return request("/metadata/locations");
+}
+
+export async function getCategories() {
+  return request("/metadata/categories");
+}
+
 export async function getRequests() {
-  await delay(300);
-  return requests;
+  return request("/requests");
 }
 
 export async function getTechnicians() {
-  await delay(300);
-  return technicians;
+  return request("/technicians");
 }
 
 export async function getStats() {
-  await delay(220);
-  const total = requests.length;
-  const pending = requests.filter((item) => item.status === "Pending").length;
-  const completed = requests.filter(
-    (item) => item.status === "Completed",
-  ).length;
-
-  return { total, pending, completed };
+  return request("/stats");
 }
 
-// Create a new request and append to the in-memory mock list
 export async function createRequest(requestData) {
-  await delay(450);
-
-  // ensure priority is integer
-  const priority = Number(requestData.priority) || 1;
-
-  // derive next id from existing requests
-  const numericIds = requests
-    .map((r) => {
-      const m = String(r.id).match(/REQ-(\d+)/);
-      return m ? parseInt(m[1], 10) : null;
-    })
-    .filter(Boolean);
-
-  const next = numericIds.length ? Math.max(...numericIds) + 1 : 1001;
-  const newId = `REQ-${next}`;
-
-  const today = new Date().toISOString().split("T")[0];
-
-  const newRequest = {
-    id: newId,
-    title: requestData.title,
-    description: requestData.description,
-    location: requestData.location,
-    category: requestData.category,
-    priority: priority,
-    status: "Pending",
-    date: today,
-    createdBy: requestData.createdBy,
-    assignedTechnician: null,
-  };
-
-  requests.push(newRequest);
-  return newRequest;
+  return request("/requests", {
+    method: "POST",
+    body: JSON.stringify({
+      title: requestData.title,
+      description: requestData.description,
+      location: requestData.location,
+      category: requestData.category,
+      priority: Number(requestData.priority) || 1,
+      createdBy: requestData.createdBy,
+    }),
+  });
 }
 
 export async function getUserRequests(userId) {
-  await delay(220);
-  return requests.filter((r) => r.createdBy === userId);
+  return request(`/requests?userId=${userId}`);
 }
 
 export async function getRequestById(requestId) {
-  await delay(180);
-  const idStr = String(requestId);
-  return requests.find((r) => String(r.id) === idStr) || null;
+  try {
+    return await request(`/requests/${requestId}`);
+  } catch {
+    return null;
+  }
 }
 
 export async function getTechnicianById(techId) {
-  await delay(140);
-  return technicians.find((t) => t.id === techId) || null;
+  try {
+    return await request(`/technicians/${techId}`);
+  } catch {
+    return null;
+  }
 }
 
 export async function getTechnicianAssignments(technicianId) {
-  await delay(220);
-  return requests.filter((r) => r.assignedTechnician === technicianId);
+  return request(`/technicians/${technicianId}/assignments`);
 }
 
 export async function updateRequestStatus(requestId, newStatus) {
-  await delay(180);
-  const idStr = String(requestId);
-  const r = requests.find((item) => String(item.id) === idStr);
-  if (!r) throw new Error("Request not found");
-  r.status = newStatus;
-  return r;
+  return request(`/requests/${requestId}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status: newStatus }),
+  });
 }
 
 export async function acceptAssignment(requestId, technicianId) {
-  await delay(200);
-  const idStr = String(requestId);
-  const r = requests.find((item) => String(item.id) === idStr);
-  if (!r) throw new Error("Request not found");
-  r.assignedTechnician = technicianId;
-  r.status = "Assigned";
-  return r;
+  return request(`/requests/${requestId}/accept`, {
+    method: "POST",
+    body: JSON.stringify({ technicianId }),
+  });
 }
 
-export async function rejectAssignment(requestId, reason) {
-  await delay(200);
-  const idStr = String(requestId);
-  const r = requests.find((item) => String(item.id) === idStr);
-  if (!r) throw new Error("Request not found");
-  r.assignedTechnician = null;
-  r.status = "Pending";
-  r.rejectReason = reason || null;
-  return r;
+export async function rejectAssignment(requestId, reason, technicianId) {
+  const payload = { technicianId };
+  if (reason) payload.reason = reason;
+
+  return request(`/requests/${requestId}/reject`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function getOptimizedRoute(requestId) {
-  await delay(260);
-  const r = requests.find((item) => String(item.id) === String(requestId));
-  if (!r) throw new Error("Request not found");
-
-  // Mock route data
-  const route = {
-    start: "Main Maintenance Workshop",
-    destination: r.location,
-    distanceMeters: 850 + (r.priority || 0) * 10,
-    distanceKm: ((850 + (r.priority || 0) * 10) / 1000).toFixed(2),
-    estimated: {
-      walking: "11 minutes",
-      driving: "3 minutes",
-    },
-    steps: [
-      "Head North from Workshop",
-      "Turn East towards JCT",
-      `Follow campus road to ${r.location}`,
-      "Arrive at destination",
-    ],
-  };
-
-  return route;
+  return request(`/requests/${requestId}/route`);
 }
 
-// Admin APIs
 export async function getAllRequests(filters = {}) {
-  await delay(220);
-  let result = [...requests];
-  if (filters.status)
-    result = result.filter((r) => r.status === filters.status);
-  if (filters.category)
-    result = result.filter((r) => r.category === filters.category);
-  if (filters.priority)
-    result = result.filter(
-      (r) => Number(r.priority) === Number(filters.priority),
-    );
-  return result;
+  const params = new URLSearchParams();
+  if (filters.status && filters.status !== "All") {
+    params.set("status", filters.status);
+  }
+  if (filters.category && filters.category !== "All") {
+    params.set("category", filters.category);
+  }
+  if (filters.priority && filters.priority !== "All") {
+    params.set("priority", String(filters.priority));
+  }
+
+  const query = params.toString();
+  return request(query ? `/requests?${query}` : "/requests");
 }
 
 export async function assignTechnicianToRequest(requestId, technicianId) {
-  await delay(200);
-  const idStr = String(requestId);
-  const r = requests.find((item) => String(item.id) === idStr);
-  if (!r) throw new Error("Request not found");
-  r.assignedTechnician = technicianId;
-  r.status = "Assigned";
+  return request(`/requests/${requestId}/assign`, {
+    method: "POST",
+    body: JSON.stringify(
+      technicianId ? { technicianId: Number(technicianId) } : {},
+    ),
+  });
+}
 
-  // increment technician assigned count (store locally)
-  const tech = technicians.find((t) => t.id === technicianId);
-  if (tech) {
-    tech.assignedCount = (tech.assignedCount || 0) + 1;
-    tech.status = "Busy";
-  }
-
-  return r;
+export async function autoAssignAllPending() {
+  return request("/requests/auto-assign", { method: "POST" });
 }
 
 export async function getPriorityQueue() {
-  await delay(160);
-  return requests
-    .filter((r) => r.status === "Pending")
+  const pending = await request("/requests?status=Pending");
+  return pending
     .slice()
     .sort((a, b) => Number(b.priority) - Number(a.priority));
 }
 
 export async function getOptimizationMetrics() {
-  await delay(200);
-  const pendingQueue = await getPriorityQueue();
-  const avgResponse = 24; // mock minutes
-  const shortestRouteSample = { avgMeters: 720, avgTimeMinutes: 9 };
+  const [stats, pendingQueue] = await Promise.all([
+    getStats(),
+    getPriorityQueue(),
+  ]);
 
   return {
-    averageResponseMinutes: avgResponse,
+    averageResponseMinutes: 24,
     pendingPriorityQueueLength: pendingQueue.length,
-    shortestRouteSample,
+    shortestRouteSample: { avgMeters: 720, avgTimeMinutes: 9 },
     algorithm: {
       name: "Dijkstra",
       runAt: new Date().toISOString(),
-      notes: "Mock results for demo",
+      notes: "Nearest technician matching via campus road graph",
     },
+    stats,
   };
 }

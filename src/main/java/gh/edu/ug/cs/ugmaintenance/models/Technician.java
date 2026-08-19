@@ -7,6 +7,7 @@ public class Technician {
     private String fullName;
     private String specialization;
     private int categoryId;
+    private int locationId;
     private String phoneNumber;
     private String vehicleAssigned;
     private boolean availabilityStatus;
@@ -19,6 +20,7 @@ public class Technician {
                       String fullName,
                       String specialization,
                       int categoryId,
+                      int locationId,
                       String phoneNumber,
                       String vehicleAssigned,
                       boolean availabilityStatus,
@@ -28,6 +30,7 @@ public class Technician {
         this.fullName = fullName;
         this.specialization = specialization;
         this.categoryId = categoryId;
+        this.locationId = locationId;
         this.phoneNumber = phoneNumber;
         this.vehicleAssigned = vehicleAssigned;
         this.availabilityStatus = availabilityStatus;
@@ -64,6 +67,14 @@ public class Technician {
 
     public void setCategoryId(int categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public int getLocationId() {
+        return locationId;
+    }
+
+    public void setLocationId(int locationId) {
+        this.locationId = locationId;
     }
 
     public String getPhoneNumber() {
@@ -105,6 +116,7 @@ public class Technician {
                 ", fullName='" + fullName + '\'' +
                 ", specialization='" + specialization + '\'' +
                 ", categoryId=" + categoryId +
+                ", locationId=" + locationId +
                 ", availabilityStatus=" + availabilityStatus +
                 '}';
     }

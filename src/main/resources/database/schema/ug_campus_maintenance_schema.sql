@@ -98,6 +98,7 @@ CREATE TABLE technicians (
     full_name           VARCHAR(100) NOT NULL,
     specialization      VARCHAR(100),
     category_id         INT UNSIGNED NOT NULL,
+    location_id         INT UNSIGNED NOT NULL,
     phone_number        VARCHAR(20),
     vehicle_assigned    VARCHAR(50),
     availability_status BOOLEAN      NOT NULL DEFAULT TRUE,
@@ -105,7 +106,13 @@ CREATE TABLE technicians (
 
     CONSTRAINT fk_technicians_category
         FOREIGN KEY (category_id) REFERENCES service_categories (id)
-        ON UPDATE CASCADE ON DELETE RESTRICT
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_technicians_location
+        FOREIGN KEY (location_id) REFERENCES locations (id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
 );
 
 -- ============================================================

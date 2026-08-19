@@ -131,6 +131,35 @@ public class CampusUserRepository extends BaseRepository implements CrudReposito
         return users;
     }
 
+    public Optional<User> findFirstByRole(UserRole role) {
+        if (role == null) {
+            return Optional.empty();
+        }
+
+        String sql = """
+                SELECT * FROM campus_users
+                WHERE role = ?
+                ORDER BY id
+                LIMIT 1
+                """;
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, role.getDbValue());
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return Optional.empty();
+    }
+
     private User mapRow(ResultSet rs) throws SQLException {
         User user = new User();
         user.setUserId(rs.getInt("id"));

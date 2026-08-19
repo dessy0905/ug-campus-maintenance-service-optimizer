@@ -41,7 +41,7 @@ function MyRequestsPage() {
     <div className="page-card">
       <div className="dashboard-header">
         <h2>My Requests</h2>
-        <p>All requests you have submitted (mock data).</p>
+        <p>All requests you have submitted.</p>
       </div>
 
       <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>

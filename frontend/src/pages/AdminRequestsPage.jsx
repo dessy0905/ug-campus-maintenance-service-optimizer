@@ -43,12 +43,12 @@ function AdminRequestsPage() {
   }, [requests, filters]);
 
   const onAssign = async (requestId) => {
-    const techId = Number(
-      prompt("Enter technician ID to assign (choose from list)"),
-    );
-    if (!techId) return;
-    await assignTechnicianToRequest(requestId, techId);
-    await load();
+    try {
+      await assignTechnicianToRequest(requestId);
+      await load();
+    } catch (err) {
+      alert(err.message || "Failed to assign technician.");
+    }
   };
 
   return (
@@ -136,7 +136,7 @@ function AdminRequestsPage() {
                   </td>
                   <td>
                     <button onClick={() => onAssign(r.id)}>
-                      Assign Technician
+                      Auto-Assign Nearest
                     </button>
                     <button style={{ marginLeft: 8 }}>View Details</button>
                   </td>

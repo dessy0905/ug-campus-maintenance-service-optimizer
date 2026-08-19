@@ -2,16 +2,11 @@ package gh.edu.ug.cs.ugmaintenance.datastructures.graph;
 
 import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashMap;
 import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashSet;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.LinkedList;
 import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 
 public class Dijkstra {
 
-    /*
-     * Represents infinity.
-     *
-     * A very large value is used instead of Double.POSITIVE_INFINITY
-     * so that the algorithm remains easy to understand.
-     */
     private static final double INFINITY = Double.MAX_VALUE;
 
     private final Graph graph;
@@ -30,10 +25,6 @@ public class Dijkstra {
     /**
      * Finds the shortest distances from a starting location
      * to every other location in the graph.
-     *
-     * Returns:
-     *
-     * locationId -> shortest distance from start
      */
     public HashMap<Integer, Double> shortestDistances(
             int startLocationId) {
@@ -45,22 +36,130 @@ public class Dijkstra {
             );
         }
 
+        HashMap<Integer, Double> distances =
+                new HashMap<>();
+
+        HashSet<Integer> visited =
+                new HashSet<>();
+
+        List<Integer> vertices =
+                graph.getVertices();
+
+        for (int i = 0; i < vertices.size(); i++) {
+
+            Integer vertex = vertices.get(i);
+
+            distances.put(vertex, INFINITY);
+        }
+
+        distances.put(startLocationId, 0.0);
+
+        while (visited.size() < graph.size()) {
+
+            Integer currentVertex =
+                    findClosestUnvisitedVertex(
+                            distances,
+                            visited
+                    );
+
+            if (currentVertex == null) {
+                break;
+            }
+
+            visited.add(currentVertex);
+
+            HashSet<Integer> neighbours =
+                    graph.getNeighbours(currentVertex);
+
+            List<Integer> neighbourList =
+                    neighbours.toList();
+
+            for (int i = 0; i < neighbourList.size(); i++) {
+
+                Integer neighbour =
+                        neighbourList.get(i);
+
+                if (visited.contains(neighbour)) {
+                    continue;
+                }
+
+                double edgeWeight =
+                        graph.getEdgeWeight(
+                                currentVertex,
+                                neighbour
+                        );
+
+                double candidateDistance =
+                        distances.get(currentVertex)
+                                + edgeWeight;
+
+                if (candidateDistance
+                        < distances.get(neighbour)) {
+
+                    distances.put(
+                            neighbour,
+                            candidateDistance
+                    );
+                }
+            }
+        }
+
+        return distances;
+    }
+
+    /**
+     * Finds the shortest route from a starting location
+     * to a destination location.
+     *
+     * Returns the locations in order.
+     *
+     * Example:
+     *
+     * 1 -> 2 -> 4
+     */
+    public List<Integer> shortestPath(
+            int startLocationId,
+            int destinationLocationId) {
+
+        if (!graph.containsVertex(startLocationId)) {
+            throw new IllegalArgumentException(
+                    "Start location does not exist: "
+                            + startLocationId
+            );
+        }
+
+        if (!graph.containsVertex(destinationLocationId)) {
+            throw new IllegalArgumentException(
+                    "Destination location does not exist: "
+                            + destinationLocationId
+            );
+        }
+
         /*
-         * Stores the shortest known distance to each vertex.
-         *
-         * Example:
-         *
-         * 1 -> 0
-         * 2 -> 400
-         * 3 -> 300
-         * 4 -> 900
+         * Stores the shortest known distance
+         * to every location.
          */
         HashMap<Integer, Double> distances =
                 new HashMap<>();
 
         /*
-         * Keeps track of vertices whose shortest distance
-         * has already been finalized.
+         * Stores the previous location used to
+         * reach each location on the shortest path.
+         *
+         * Example:
+         *
+         * predecessor[2] = 1
+         * predecessor[4] = 2
+         *
+         * This gives:
+         *
+         * 1 -> 2 -> 4
+         */
+        HashMap<Integer, Integer> predecessors =
+                new HashMap<>();
+
+        /*
+         * Keeps track of finalized vertices.
          */
         HashSet<Integer> visited =
                 new HashSet<>();
@@ -79,12 +178,12 @@ public class Dijkstra {
         }
 
         /*
-         * Distance from the starting vertex to itself is 0.
+         * Starting location has distance zero.
          */
         distances.put(startLocationId, 0.0);
 
         /*
-         * Continue until every reachable vertex has been processed.
+         * Dijkstra's algorithm.
          */
         while (visited.size() < graph.size()) {
 
@@ -95,21 +194,24 @@ public class Dijkstra {
                     );
 
             /*
-             * If there is no reachable unvisited vertex,
-             * the remaining vertices are disconnected.
+             * No more reachable vertices.
              */
             if (currentVertex == null) {
                 break;
             }
 
-            /*
-             * Mark the current vertex as finalized.
-             */
             visited.add(currentVertex);
 
             /*
-             * Examine all neighbours.
+             * We have reached the destination.
+             *
+             * Because Dijkstra has finalized this
+             * vertex, its shortest distance is known.
              */
+            if (currentVertex == destinationLocationId) {
+                break;
+            }
+
             HashSet<Integer> neighbours =
                     graph.getNeighbours(currentVertex);
 
@@ -121,38 +223,22 @@ public class Dijkstra {
                 Integer neighbour =
                         neighbourList.get(i);
 
-                /*
-                 * Already finalized vertices do not
-                 * need to be processed again.
-                 */
                 if (visited.contains(neighbour)) {
                     continue;
                 }
 
-                /*
-                 * Distance from the current vertex
-                 * to this neighbour.
-                 */
                 double edgeWeight =
                         graph.getEdgeWeight(
                                 currentVertex,
                                 neighbour
                         );
 
-                /*
-                 * Candidate distance:
-                 *
-                 * distance(start → current)
-                 * +
-                 * distance(current → neighbour)
-                 */
                 double candidateDistance =
                         distances.get(currentVertex)
                                 + edgeWeight;
 
                 /*
-                 * If this route is shorter than the
-                 * currently known route, update it.
+                 * Found a shorter route.
                  */
                 if (candidateDistance
                         < distances.get(neighbour)) {
@@ -161,11 +247,71 @@ public class Dijkstra {
                             neighbour,
                             candidateDistance
                     );
+
+                    /*
+                     * Remember how we reached
+                     * this neighbour.
+                     */
+                    predecessors.put(
+                            neighbour,
+                            currentVertex
+                    );
                 }
             }
         }
 
-        return distances;
+        /*
+         * If the destination still has infinite
+         * distance, there is no route.
+         */
+        if (distances.get(destinationLocationId)
+                == INFINITY) {
+
+            return new LinkedList<>();
+        }
+
+        /*
+         * Reconstruct the path by walking backwards
+         * from destination to start.
+         */
+        List<Integer> reversedPath =
+                new LinkedList<>();
+
+        Integer current =
+                destinationLocationId;
+
+        reversedPath.add(current);
+
+        while (current != startLocationId) {
+
+            Integer predecessor =
+                    predecessors.get(current);
+
+            if (predecessor == null) {
+                return new LinkedList<>();
+            }
+
+            reversedPath.add(predecessor);
+
+            current = predecessor;
+        }
+
+        /*
+         * Reverse the path so that it goes:
+         *
+         * start -> destination
+         */
+        List<Integer> path =
+                new LinkedList<>();
+
+        for (int i = reversedPath.size() - 1;
+             i >= 0;
+             i--) {
+
+            path.add(reversedPath.get(i));
+        }
+
+        return path;
     }
 
     /**

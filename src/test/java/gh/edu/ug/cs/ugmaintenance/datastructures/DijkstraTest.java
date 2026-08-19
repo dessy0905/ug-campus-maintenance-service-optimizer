@@ -3,6 +3,7 @@ package gh.edu.ug.cs.ugmaintenance.datastructures;
 import gh.edu.ug.cs.ugmaintenance.datastructures.graph.Dijkstra;
 import gh.edu.ug.cs.ugmaintenance.datastructures.graph.Graph;
 import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashMap;
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;;
 
 public class DijkstraTest {
 
@@ -150,6 +151,32 @@ public class DijkstraTest {
                     "ERROR: Unreachable location test failed."
             );
         }
+
+
+        System.out.println("\n--- Test 5: Shortest Route ---");
+
+        List<Integer> route =
+                dijkstra.shortestPath(1, 4);
+
+        System.out.println(
+                "Shortest route from 1 to 4: "
+                        + route
+        );
+
+        if (route.size() != 3
+                || route.get(0) != 1
+                || route.get(1) != 2
+                || route.get(2) != 4) {
+
+        throw new RuntimeException(
+                "Shortest route test failed."
+        );
+        }
+
+        System.out.println(
+                "Shortest route test passed."
+        );
+
 
 
         System.out.println(
