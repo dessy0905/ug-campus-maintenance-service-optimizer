@@ -212,6 +212,7 @@ public class TechnicianRepository extends BaseRepository implements CrudReposito
         technician.setFullName(rs.getString("full_name"));
         technician.setSpecialization(rs.getString("specialization"));
         technician.setCategoryId(rs.getInt("category_id"));
+        technician.setLocationId(rs.getInt("location_id"));
         technician.setPhoneNumber(rs.getString("phone_number"));
         technician.setVehicleAssigned(rs.getString("vehicle_assigned"));
         technician.setAvailabilityStatus(rs.getBoolean("availability_status"));

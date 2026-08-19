@@ -121,6 +121,42 @@ public class ServiceCategoryRepository extends BaseRepository implements CrudRep
         return categories;
     }
 
+    public Optional<ServiceCategory> findByName(String categoryName) {
+        if (categoryName == null || categoryName.isBlank()) {
+            return Optional.empty();
+        }
+
+        String sql = """
+                SELECT * FROM service_categories
+                WHERE LOWER(category_name) = LOWER(?)
+                   OR LOWER(category_name) LIKE LOWER(?)
+                ORDER BY CASE
+                    WHEN LOWER(category_name) = LOWER(?) THEN 0
+                    ELSE 1
+                END, id
+                LIMIT 1
+                """;
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            String trimmed = categoryName.trim();
+            statement.setString(1, trimmed);
+            statement.setString(2, "%" + trimmed + "%");
+            statement.setString(3, trimmed);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return Optional.empty();
+    }
+
     private ServiceCategory mapRow(ResultSet rs) throws SQLException {
         ServiceCategory category = new ServiceCategory();
         category.setCategoryId(rs.getInt("id"));

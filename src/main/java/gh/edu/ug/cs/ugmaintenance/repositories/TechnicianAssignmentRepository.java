@@ -129,6 +129,87 @@ public class TechnicianAssignmentRepository extends BaseRepository implements Cr
         return assignments;
     }
 
+    public List<TechnicianAssignment> findByTechnicianId(int technicianId) {
+        String sql = """
+                SELECT * FROM technician_assignments
+                                WHERE technician_id = ?
+                                    AND assignment_status <> 'Rejected'
+                ORDER BY assigned_date DESC
+                """;
+        List<TechnicianAssignment> assignments = new DynamicArray<>();
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, technicianId);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    assignments.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return assignments;
+    }
+
+    public Optional<TechnicianAssignment> findByRequestId(int requestId) {
+        String sql = """
+                SELECT * FROM technician_assignments
+                                WHERE request_id = ?
+                                    AND assignment_status <> 'Rejected'
+                ORDER BY assigned_date DESC
+                LIMIT 1
+                """;
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, requestId);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return Optional.empty();
+    }
+
+    public Optional<TechnicianAssignment> findByRequestAndTechnician(
+            int requestId,
+            int technicianId) {
+
+        String sql = """
+                SELECT * FROM technician_assignments
+                WHERE request_id = ? AND technician_id = ?
+                ORDER BY assigned_date DESC
+                LIMIT 1
+                """;
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, requestId);
+            statement.setInt(2, technicianId);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return Optional.empty();
+    }
+
     public boolean updateStatus(int assignmentId, AssignmentStatus status) {
         String sql = "UPDATE technician_assignments SET assignment_status = ? WHERE id = ?";
 

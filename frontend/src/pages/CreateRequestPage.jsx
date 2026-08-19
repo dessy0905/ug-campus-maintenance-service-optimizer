@@ -1,38 +1,87 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { createRequest } from "../services/api";
+import { createRequest, getCategories, getLocations } from "../services/api";
 import "../layouts/AppLayout.css";
 import "./CreateRequestPage.css";
 
-const LOCATIONS = [
-  "Balme Library",
-  "Volta Hall",
-  "Night Market",
-  "JCT",
-  "Main Gate",
-  "Computer Science Department",
-];
-const CATEGORIES = [
+const FALLBACK_CATEGORIES = [
   "Plumbing",
   "Electrical",
-  "HVAC",
+  "ICT Support",
   "Carpentry",
-  "Masonry",
-  "General Maintenance",
+  "Cleaning",
+  "Security",
+  "AC Services",
+];
+
+const FALLBACK_LOCATIONS = [
+  "Maths department",
+  "Computer science department",
+  "Statistics department",
+  "ISSSER",
+  "Law school",
+  "School of engineering",
+  "Balme library",
+  "UG bookshop",
+  "Volta hall",
+  "UGBS",
+  "UG clinic",
+  "Akuafo hall",
+  "Legon hall",
+  "Mensah sarbah hall",
+  "Central cafeteria (CC)",
+  "Great Hall",
 ];
 
 function CreateRequestPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  const [locations, setLocations] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [location, setLocation] = useState(LOCATIONS[0]);
-  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [location, setLocation] = useState("");
+  const [category, setCategory] = useState("");
   const [priority, setPriority] = useState(3);
   const [loading, setLoading] = useState(false);
   const [created, setCreated] = useState(null);
+  const [metadataWarning, setMetadataWarning] = useState("");
+
+  useEffect(() => {
+    async function loadMetadata() {
+      const [locationResult, categoryResult] = await Promise.allSettled([
+        getLocations(),
+        getCategories(),
+      ]);
+
+      const locationNames =
+        locationResult.status === "fulfilled" && locationResult.value.length
+          ? locationResult.value
+          : FALLBACK_LOCATIONS;
+      const categoryNames =
+        categoryResult.status === "fulfilled" && categoryResult.value.length
+          ? categoryResult.value
+          : FALLBACK_CATEGORIES;
+
+      setLocations(locationNames);
+      setCategories(categoryNames);
+      setLocation(locationNames[0] || "");
+      setCategory(categoryNames[0] || "");
+
+      if (
+        locationResult.status === "rejected" ||
+        categoryResult.status === "rejected"
+      ) {
+        setMetadataWarning(
+          "Some options are being shown from the local campus list. The server must be running to submit a request.",
+        );
+      }
+    }
+
+    loadMetadata();
+  }, []);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -51,7 +100,7 @@ function CreateRequestPage() {
       setCreated(result);
     } catch (err) {
       console.error(err);
-      alert("Failed to create request.");
+      alert(err.message || "Failed to create request.");
     } finally {
       setLoading(false);
     }
@@ -61,11 +110,17 @@ function CreateRequestPage() {
     <div className="page-card">
       <div className="dashboard-header">
         <h2>Create Maintenance Request</h2>
-        <p>Submit a new service request — mock-only flow.</p>
+        <p>
+          Submit a new service request. The nearest available technician will be
+          assigned automatically.
+        </p>
       </div>
 
       {!created ? (
         <form onSubmit={submit} className="create-request-form">
+          {metadataWarning ? (
+            <div className="form-note">{metadataWarning}</div>
+          ) : null}
           <div className="form-group">
             <label htmlFor="request-title">Title</label>
             <input
@@ -96,8 +151,9 @@ function CreateRequestPage() {
                 id="request-location"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
+                required
               >
-                {LOCATIONS.map((l) => (
+                {locations.map((l) => (
                   <option key={l} value={l}>
                     {l}
                   </option>
@@ -111,8 +167,9 @@ function CreateRequestPage() {
                 id="request-category"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
+                required
               >
-                {CATEGORIES.map((c) => (
+                {categories.map((c) => (
                   <option key={c} value={c}>
                     {c}
                   </option>
@@ -137,7 +194,7 @@ function CreateRequestPage() {
           </div>
 
           <div className="form-actions">
-            <button type="submit" disabled={loading}>
+            <button type="submit" disabled={loading || !location || !category}>
               {loading ? "Submitting…" : "Submit Request"}
             </button>
             <button type="button" onClick={() => navigate(-1)}>
@@ -151,6 +208,14 @@ function CreateRequestPage() {
           <p>
             Your request has been created with ID <strong>{created.id}</strong>.
           </p>
+          {created.assignedTechnician ? (
+            <p>
+              Assigned technician ID:{" "}
+              <strong>{created.assignedTechnician}</strong>
+            </p>
+          ) : (
+            <p>No technician was available for automatic assignment.</p>
+          )}
           <div className="success-actions">
             <button onClick={() => navigate(`/user/requests/${created.id}`)}>
               View Request Details

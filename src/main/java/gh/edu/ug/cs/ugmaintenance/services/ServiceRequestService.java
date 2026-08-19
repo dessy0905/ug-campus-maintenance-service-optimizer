@@ -93,6 +93,25 @@ public class ServiceRequestService {
             return repository.findByLocation(locationId);
         }
 
+        public List<ServiceRequest> getRequestsByUser(int userId) {
+            if (userId <= 0) {
+                throw new IllegalArgumentException("Invalid user ID.");
+            }
+
+            return repository.findByUserId(userId);
+        }
+
+        public boolean updateStatus(int requestId, RequestStatus status) {
+            if (requestId <= 0) {
+                throw new IllegalArgumentException("Invalid request ID.");
+            }
+            if (status == null) {
+                throw new IllegalArgumentException("Status cannot be null.");
+            }
+
+            return repository.updateStatus(requestId, status);
+        }
+
         public Optional<ServiceRequest> getRequestById(int id){
             if (id <= 0) {
                 throw new IllegalArgumentException("Invalid request ID.");

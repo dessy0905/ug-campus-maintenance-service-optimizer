@@ -1,8 +1,8 @@
 package gh.edu.ug.cs.ugmaintenance.datastructures.hashtable;
 
-import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashTable;
 import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashMap;
 import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashSet;
+import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashTable;
 import gh.edu.ug.cs.ugmaintenance.models.Location;
 import gh.edu.ug.cs.ugmaintenance.models.enums.LocationType;
 import org.junit.Test;

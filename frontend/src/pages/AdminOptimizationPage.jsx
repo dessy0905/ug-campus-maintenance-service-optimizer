@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {
   getPriorityQueue,
   getOptimizationMetrics,
-  getAllRequests,
+  autoAssignAllPending,
 } from "../services/api";
 import "../layouts/AppLayout.css";
 
@@ -73,10 +73,15 @@ function AdminOptimizationPage() {
               <button
                 style={{ marginTop: 8 }}
                 onClick={async () => {
-                  // naive mock: assign highest priority pending to first available technician
-                  const pending = await getPriorityQueue();
-                  const all = await getAllRequests();
-                  alert("Auto-assignment mocked for demo");
+                  try {
+                    const result = await autoAssignAllPending();
+                    alert(
+                      `Auto-assignment complete. ${result.assignedCount} request(s) assigned.`,
+                    );
+                    await load();
+                  } catch (err) {
+                    alert(err.message || "Auto-assignment failed.");
+                  }
                 }}
               >
                 Run Auto-Assignment Algorithm

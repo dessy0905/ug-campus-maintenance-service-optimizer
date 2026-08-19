@@ -182,6 +182,46 @@ public class ServiceRequestRepository
         return requests;
     }
 
+    public List<ServiceRequest> findByUserId(int userId) {
+        String sql = """
+                SELECT * FROM service_requests
+                WHERE user_id = ?
+                ORDER BY request_date DESC
+                """;
+        List<ServiceRequest> requests = new DynamicArray<>();
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, userId);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    requests.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return requests;
+    }
+
+    public boolean updateStatus(int requestId, RequestStatus status) {
+        String sql = "UPDATE service_requests SET status = ? WHERE id = ?";
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, status.getDbValue());
+            statement.setInt(2, requestId);
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public List<ServiceRequest> findPendingRequests() {
         return findByStatus(RequestStatus.PENDING);
     }
@@ -299,7 +339,7 @@ public class ServiceRequestRepository
         request.setCategoryId(rs.getInt("category_id"));
         request.setRequestTitle(rs.getString("request_title"));
         request.setDescription(rs.getString("description"));
-        request.setUrgencyLevel(rs.getInt("urgency_level"));
+        request.setUrgencyLevel(parseUrgencyLevel(rs));
         request.setStatus(RequestStatus.fromDbValue(rs.getString("status")));
 
         var requestDate = rs.getTimestamp("request_date");
@@ -313,5 +353,31 @@ public class ServiceRequestRepository
         }
 
         return request;
+    }
+
+    private int parseUrgencyLevel(ResultSet rs) throws SQLException {
+        Object value = rs.getObject("urgency_level");
+
+        if (value == null) {
+            return 1;
+        }
+
+        if (value instanceof Number number) {
+            return number.intValue();
+        }
+
+        String text = value.toString().trim();
+
+        try {
+            return Integer.parseInt(text);
+        } catch (NumberFormatException ignored) {
+            return switch (text.toLowerCase()) {
+                case "low", "lowest" -> 1;
+                case "medium", "moderate" -> 3;
+                case "high" -> 4;
+                case "critical", "urgent", "highest" -> 5;
+                default -> 3;
+            };
+        }
     }
 }

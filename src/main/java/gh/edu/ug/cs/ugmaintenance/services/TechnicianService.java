@@ -30,6 +30,10 @@ public class TechnicianService {
         return repository.findAvailableTechnicians();
     }
 
+    public List<Technician> getAllTechnicians() {
+        return repository.findAll();
+    }
+
     public List<Technician> getTechniciansByCategory(int categoryId) {
 
         if (categoryId <= 0) {

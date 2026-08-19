@@ -47,7 +47,7 @@ function TechnicianRequestDetailsPage() {
 
   const doReject = async () => {
     const reason = prompt("Optional rejection reason");
-    await rejectAssignment(id, reason);
+    await rejectAssignment(id, reason, user.id);
     const r = await getRequestById(id);
     setRequest(r);
   };
@@ -163,7 +163,7 @@ function TechnicianRequestDetailsPage() {
                   <strong>{route.destination}</strong>
                 </p>
                 <p>
-                  Distance: {route.distanceMeters} m ({route.distanceKm} km)
+                  Distance: {route.distanceMeters} m ({Number(route.distanceKm).toFixed(2)} km)
                 </p>
                 <p>
                   ETA: walking {route.estimated.walking} / driving{" "}

@@ -31,6 +31,8 @@ public class DatabaseConnection {
                         + "/"
                         + database
                         + "?serverTimezone=UTC"
+                        + "&connectTimeout=10000"
+                        + "&socketTimeout=10000"
                         + "&sslMode="
                         + (ssl ? "REQUIRED" : "DISABLED");
 

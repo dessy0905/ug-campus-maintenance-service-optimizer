@@ -47,7 +47,7 @@ function TechnicianAssignmentsPage() {
 
   const onReject = async (id) => {
     const reason = prompt("Optional rejection reason");
-    await rejectAssignment(id, reason);
+    await rejectAssignment(id, reason, user.id);
     await load();
   };
 
@@ -65,7 +65,7 @@ function TechnicianAssignmentsPage() {
     <div className="page-card">
       <div className="dashboard-header">
         <h2>My Assignments</h2>
-        <p>Assigned maintenance work for you (mock data).</p>
+        <p>Assigned maintenance work for you.</p>
       </div>
 
       <div style={{ marginBottom: 12, display: "flex", gap: 8 }}>
