@@ -1,5 +1,6 @@
 package gh.edu.ug.cs.ugmaintenance.datastructures.graph;
 
+import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.LinkedList;
 import gh.edu.ug.cs.ugmaintenance.datastructures.linkedlist.List;
 import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashMap;
 import gh.edu.ug.cs.ugmaintenance.datastructures.hash.HashSet;
@@ -290,7 +291,373 @@ public class Graph {
 
         return getNeighbours(locationId).size();
     }
+/*
+     * Find the shortest distance between two locations
+     * using Dijkstra's shortest-path algorithm.
+     */
+    public double shortestDistance(
+            int startLocationId,
+            int destinationLocationId) {
 
+        validateLocationId(startLocationId);
+        validateLocationId(destinationLocationId);
+
+        if (!adjacencyList.containsKey(startLocationId)) {
+            throw new IllegalArgumentException(
+                    "Start location does not exist: "
+                            + startLocationId
+            );
+        }
+
+        if (!adjacencyList.containsKey(destinationLocationId)) {
+            throw new IllegalArgumentException(
+                    "Destination location does not exist: "
+                            + destinationLocationId
+            );
+        }
+
+        HashMap<Integer, Double> distances =
+                new HashMap<>();
+
+        HashSet<Integer> visited =
+                new HashSet<>();
+
+        List<Integer> vertices =
+                adjacencyList.keySet();
+
+        /*
+         * Initially, every location is unreachable.
+         */
+        for (int i = 0; i < vertices.size(); i++) {
+
+            distances.put(
+                    vertices.get(i),
+                    Double.POSITIVE_INFINITY
+            );
+        }
+
+        /*
+         * Distance from the start location
+         * to itself is zero.
+         */
+        distances.put(startLocationId, 0.0);
+
+        /*
+         * Dijkstra's algorithm.
+         */
+        while (visited.size() < adjacencyList.size()) {
+
+            Integer current =
+                    getClosestUnvisitedVertex(
+                            distances,
+                            visited
+                    );
+
+            /*
+             * No more reachable vertices.
+             */
+            if (current == null) {
+                break;
+            }
+
+            /*
+             * Once the destination is selected,
+             * its shortest distance is final.
+             */
+            if (current.equals(destinationLocationId)) {
+                break;
+            }
+
+            visited.add(current);
+
+            HashMap<Integer, Double> neighbours =
+                    adjacencyList.get(current);
+
+            List<Integer> neighbourIds =
+                    neighbours.keySet();
+
+            /*
+             * Examine all neighbours.
+             */
+            for (int i = 0;
+                 i < neighbourIds.size();
+                 i++) {
+
+                Integer neighbour =
+                        neighbourIds.get(i);
+
+                if (visited.contains(neighbour)) {
+                    continue;
+                }
+
+                double edgeWeight =
+                        neighbours.get(neighbour);
+
+                double newDistance =
+                        distances.get(current)
+                                + edgeWeight;
+
+                /*
+                 * Update distance if a shorter
+                 * route has been discovered.
+                 */
+                if (newDistance
+                        < distances.get(neighbour)) {
+
+                    distances.put(
+                            neighbour,
+                            newDistance
+                    );
+                }
+            }
+        }
+
+        double result =
+                distances.get(destinationLocationId);
+
+        if (result == Double.POSITIVE_INFINITY) {
+            throw new IllegalArgumentException(
+                    "No path exists between "
+                            + startLocationId
+                            + " and "
+                            + destinationLocationId
+            );
+        }
+
+        return result;
+    }
+
+
+    /*
+     * Find the unvisited vertex with the
+     * smallest known distance.
+     */
+    private Integer getClosestUnvisitedVertex(
+            HashMap<Integer, Double> distances,
+            HashSet<Integer> visited) {
+
+        Integer closestVertex = null;
+
+        double shortestDistance =
+                Double.POSITIVE_INFINITY;
+
+        List<Integer> vertices =
+                adjacencyList.keySet();
+
+        for (int i = 0; i < vertices.size(); i++) {
+
+            Integer vertex =
+                    vertices.get(i);
+
+            if (visited.contains(vertex)) {
+                continue;
+            }
+
+            double distance =
+                    distances.get(vertex);
+
+            if (distance < shortestDistance) {
+
+                shortestDistance = distance;
+                closestVertex = vertex;
+            }
+        }
+
+        return closestVertex;
+    }
+
+
+    /*
+     * Find the actual shortest route between
+     * two locations.
+     *
+     * Example:
+     *
+     * [1, 2, 4]
+     *
+     * means:
+     *
+     * 1 -> 2 -> 4
+     */
+    public List<Integer> shortestPath(
+            int startLocationId,
+            int destinationLocationId) {
+
+        validateLocationId(startLocationId);
+        validateLocationId(destinationLocationId);
+
+        if (!adjacencyList.containsKey(startLocationId)) {
+            throw new IllegalArgumentException(
+                    "Start location does not exist: "
+                            + startLocationId
+            );
+        }
+
+        if (!adjacencyList.containsKey(destinationLocationId)) {
+            throw new IllegalArgumentException(
+                    "Destination location does not exist: "
+                            + destinationLocationId
+            );
+        }
+
+        HashMap<Integer, Double> distances =
+                new HashMap<>();
+
+        HashMap<Integer, Integer> previous =
+                new HashMap<>();
+
+        HashSet<Integer> visited =
+                new HashSet<>();
+
+        List<Integer> vertices =
+                adjacencyList.keySet();
+
+        /*
+         * Initially every location has
+         * infinite distance.
+         */
+        for (int i = 0; i < vertices.size(); i++) {
+
+            distances.put(
+                    vertices.get(i),
+                    Double.POSITIVE_INFINITY
+            );
+        }
+
+        /*
+         * Start location has distance zero.
+         */
+        distances.put(startLocationId, 0.0);
+
+        /*
+         * Dijkstra's algorithm.
+         */
+        while (visited.size() < adjacencyList.size()) {
+
+            Integer current =
+                    getClosestUnvisitedVertex(
+                            distances,
+                            visited
+                    );
+
+            if (current == null) {
+                break;
+            }
+
+            /*
+             * Destination has been reached.
+             */
+            if (current.equals(destinationLocationId)) {
+                break;
+            }
+
+            visited.add(current);
+
+            HashMap<Integer, Double> neighbours =
+                    adjacencyList.get(current);
+
+            List<Integer> neighbourIds =
+                    neighbours.keySet();
+
+            for (int i = 0;
+                 i < neighbourIds.size();
+                 i++) {
+
+                Integer neighbour =
+                        neighbourIds.get(i);
+
+                if (visited.contains(neighbour)) {
+                    continue;
+                }
+
+                double edgeWeight =
+                        neighbours.get(neighbour);
+
+                double newDistance =
+                        distances.get(current)
+                                + edgeWeight;
+
+                if (newDistance
+                        < distances.get(neighbour)) {
+
+                    distances.put(
+                            neighbour,
+                            newDistance
+                    );
+
+                    /*
+                     * Store the location from
+                     * which we reached this
+                     * neighbour.
+                     */
+                    previous.put(
+                            neighbour,
+                            current
+                    );
+                }
+            }
+        }
+
+        /*
+         * No route exists.
+         */
+        if (distances.get(destinationLocationId)
+                == Double.POSITIVE_INFINITY) {
+
+            throw new IllegalArgumentException(
+                    "No path exists between "
+                            + startLocationId
+                            + " and "
+                            + destinationLocationId
+            );
+        }
+
+        /*
+         * Build the route backwards.
+         *
+         * Example:
+         *
+         * destination = 4
+         * previous[4] = 2
+         * previous[2] = 1
+         *
+         * Gives:
+         *
+         * 4 -> 2 -> 1
+         */
+        LinkedList<Integer> reversePath =
+                new LinkedList<>();
+
+        Integer current =
+                destinationLocationId;
+
+        while (current != null) {
+
+            reversePath.add(current);
+
+            if (current.equals(startLocationId)) {
+                break;
+            }
+
+            current = previous.get(current);
+        }
+
+        /*
+         * Reverse the route so that it goes
+         * from start to destination.
+         */
+        LinkedList<Integer> path =
+                new LinkedList<>();
+
+        for (int i = reversePath.size() - 1;
+             i >= 0;
+             i--) {
+
+            path.add(reversePath.get(i));
+        }
+
+        return path;
+    }
     /*
      * Display the weighted graph.
      */
