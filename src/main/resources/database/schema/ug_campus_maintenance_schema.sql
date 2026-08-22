@@ -52,6 +52,8 @@ CREATE TABLE locations (
                       'Lecture Hall'
                     ) NOT NULL,
     description     TEXT,
+    x_coordinate    DECIMAL(18, 15) DEFAULT NULL,
+    y_coordinate    DECIMAL(18, 15) DEFAULT NULL,
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
