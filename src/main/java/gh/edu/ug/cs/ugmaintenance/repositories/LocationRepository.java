@@ -165,6 +165,8 @@ public class LocationRepository extends BaseRepository implements CrudRepository
         location.setLocationName(rs.getString("location_name"));
         location.setLocationType(LocationType.fromDbValue(rs.getString("location_type")));
         location.setDescription(rs.getString("description"));
+        location.setXCoordinate(rs.getDouble("x_coordinate"));
+        location.setYCoordinate(rs.getDouble("y_coordinate"));
 
         Timestamp createdAt = rs.getTimestamp("created_at");
         if (createdAt != null) {
