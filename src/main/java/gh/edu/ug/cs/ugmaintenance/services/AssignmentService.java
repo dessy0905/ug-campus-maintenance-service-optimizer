@@ -133,11 +133,17 @@ public class AssignmentService {
         List<ServiceRequest> pendingRequests =
                 requestRepository.findPendingRequests();
 
-        int assignedCount = 0;
+        gh.edu.ug.cs.ugmaintenance.datastructures.queue.PriorityQueue<ServiceRequest> queue =
+                new gh.edu.ug.cs.ugmaintenance.datastructures.queue.PriorityQueue<>();
 
         for (int i = 0; i < pendingRequests.size(); i++) {
-            ServiceRequest request = pendingRequests.get(i);
+            queue.offer(pendingRequests.get(i));
+        }
 
+        int assignedCount = 0;
+
+        while (!queue.isEmpty()) {
+            ServiceRequest request = queue.poll();
             if (autoAssignNearestTechnician(request.getRequestId())) {
                 assignedCount++;
             }
@@ -248,10 +254,26 @@ public class AssignmentService {
             );
         }
 
-        return assignmentRepository.updateStatus(
+        Optional<TechnicianAssignment> assignment =
+                assignmentRepository.findById(assignmentId);
+
+        if (assignment.isEmpty()) {
+            throw new IllegalArgumentException("Assignment not found.");
+        }
+
+        boolean accepted = assignmentRepository.updateStatus(
                 assignmentId,
                 AssignmentStatus.ACCEPTED
         );
+
+        if (accepted) {
+            requestRepository.updateStatus(
+                    assignment.get().getRequestId(),
+                    RequestStatus.ACCEPTED
+            );
+        }
+
+        return accepted;
     }
 
     /*
@@ -346,14 +368,22 @@ public class AssignmentService {
                 assignmentRepository.findByTechnicianId(technicianId);
 
         List<ServiceRequest> requests = new gh.edu.ug.cs.ugmaintenance.datastructures.array.DynamicArray<>();
+        if (assignments.isEmpty()) {
+            return requests;
+        }
+
+        List<ServiceRequest> allRequests = requestRepository.findAll();
+        java.util.Map<Integer, ServiceRequest> map = new java.util.HashMap<>();
+        for (int i = 0; i < allRequests.size(); i++) {
+            ServiceRequest r = allRequests.get(i);
+            map.put(r.getRequestId(), r);
+        }
 
         for (int i = 0; i < assignments.size(); i++) {
             TechnicianAssignment assignment = assignments.get(i);
-            Optional<ServiceRequest> request =
-                    requestRepository.findById(assignment.getRequestId());
-
-            if (request.isPresent()) {
-                requests.add(request.get());
+            ServiceRequest request = map.get(assignment.getRequestId());
+            if (request != null) {
+                requests.add(request);
             }
         }
 
@@ -361,6 +391,10 @@ public class AssignmentService {
     }
 
     public boolean acceptAssignmentByRequest(int requestId, int technicianId) {
+        if (requestId <= 0 || technicianId <= 0) {
+            throw new IllegalArgumentException("Invalid request ID or technician ID.");
+        }
+
         Optional<TechnicianAssignment> assignment =
                 assignmentRepository.findByRequestAndTechnician(
                         requestId,
@@ -368,7 +402,9 @@ public class AssignmentService {
                 );
 
         if (assignment.isEmpty()) {
-            throw new IllegalArgumentException("Assignment not found.");
+            throw new IllegalArgumentException(
+                    "Unauthorized: Technician " + technicianId + " is not assigned to request " + requestId
+            );
         }
 
         return acceptAssignment(assignment.get().getAssignmentId());

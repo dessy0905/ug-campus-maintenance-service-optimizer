@@ -17,21 +17,34 @@ function TechnicianAssignmentsPage() {
   const navigate = useNavigate();
 
   const load = async () => {
+    if (!user || !user.id) return;
     setLoading(true);
-    const data = await getTechnicianAssignments(user.id);
-    setRequests(data);
-    setLoading(false);
+    try {
+      const data = await getTechnicianAssignments(user.id);
+      setRequests(data || []);
+    } catch {
+      setRequests([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     load();
-  }, []);
+  }, [user]);
 
   const filtered = useMemo(() => {
     if (tab === "All") return requests;
     if (tab === "Pending Acceptance")
       return requests.filter(
-        (r) => r.status === "Assigned" || r.status === "Pending",
+        (r) =>
+          (r.status === "Assigned" || r.assignmentStatus === "Assigned") &&
+          r.status !== "Accepted" &&
+          r.assignmentStatus !== "Accepted",
+      );
+    if (tab === "Accepted")
+      return requests.filter(
+        (r) => r.status === "Accepted" || r.assignmentStatus === "Accepted",
       );
     if (tab === "Active")
       return requests.filter((r) => r.status === "In Progress");
@@ -69,7 +82,7 @@ function TechnicianAssignmentsPage() {
       </div>
 
       <div style={{ marginBottom: 12, display: "flex", gap: 8 }}>
-        {["All", "Pending Acceptance", "Active", "Completed"].map((t) => (
+        {["All", "Pending Acceptance", "Accepted", "Active", "Completed"].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -98,57 +111,70 @@ function TechnicianAssignmentsPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((r) => (
-                <tr key={r.id}>
-                  <td>{r.id}</td>
-                  <td>{r.title}</td>
-                  <td>{r.location}</td>
-                  <td>
-                    <span
-                      className={`status-pill status-priority-${r.priority}`}
-                    >
-                      {r.priority}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      className={`status-pill status-${String(r.status).replace(/\s+/g, "-").toLowerCase()}`}
-                    >
-                      {r.status}
-                    </span>
-                  </td>
-                  <td>
-                    {r.status === "Assigned" || r.status === "Pending" ? (
-                      <>
-                        <button onClick={() => onAccept(r.id)}>
-                          Accept Assignment
-                        </button>
-                        <button
-                          onClick={() => onReject(r.id)}
-                          style={{ marginLeft: 6 }}
-                        >
-                          Reject Assignment
-                        </button>
-                      </>
-                    ) : null}
+              {filtered.map((r) => {
+                const isPendingAccept =
+                  (r.status === "Assigned" || r.assignmentStatus === "Assigned") &&
+                  r.status !== "Accepted" &&
+                  r.assignmentStatus !== "Accepted";
+                const isAccepted =
+                  r.status === "Accepted" || r.assignmentStatus === "Accepted";
 
-                    {r.status === "In Progress" ? (
-                      <>
+                return (
+                  <tr key={r.id}>
+                    <td>#{r.id}</td>
+                    <td>{r.title}</td>
+                    <td>{r.location}</td>
+                    <td>
+                      <span
+                        className={`status-pill status-priority-${r.priority}`}
+                      >
+                        Level {r.priority}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        className={`status-pill status-${String(r.status).replace(/\s+/g, "-").toLowerCase()}`}
+                      >
+                        {r.status}
+                      </span>
+                    </td>
+                    <td>
+                      {isPendingAccept ? (
+                        <>
+                          <button onClick={() => onAccept(r.id)}>
+                            Accept Assignment
+                          </button>
+                          <button
+                            onClick={() => onReject(r.id)}
+                            style={{ marginLeft: 6 }}
+                          >
+                            Reject
+                          </button>
+                        </>
+                      ) : null}
+
+                      {isAccepted ? (
+                        <button onClick={() => onStart(r.id)}>
+                          Start Work (In Progress)
+                        </button>
+                      ) : null}
+
+                      {r.status === "In Progress" ? (
                         <button onClick={() => onComplete(r.id)}>
                           Mark as Completed
                         </button>
-                      </>
-                    ) : null}
+                      ) : null}
 
-                    <button
-                      onClick={() => navigate(`/technician/requests/${r.id}`)}
-                      style={{ marginLeft: 8 }}
-                    >
-                      View Route & Details
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                      <button
+                        onClick={() => navigate(`/technician/requests/${r.id}`)}
+                        style={{ marginLeft: 8 }}
+                      >
+                        View Route & Details
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

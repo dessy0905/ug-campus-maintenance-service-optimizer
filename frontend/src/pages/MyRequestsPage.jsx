@@ -8,16 +8,24 @@ function MyRequestsPage() {
   const { user } = useAuth();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState("All");
   const [q, setQ] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     async function load() {
+      if (!user || !user.id) return;
       setLoading(true);
-      const data = await getUserRequests(user.id);
-      setRequests(data);
-      setLoading(false);
+      setError(null);
+      try {
+        const data = await getUserRequests(user.id);
+        setRequests(data || []);
+      } catch {
+        setError("Unable to load requests. Please try again.");
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, [user]);
@@ -44,6 +52,22 @@ function MyRequestsPage() {
         <p>All requests you have submitted.</p>
       </div>
 
+      {error && (
+        <div
+          style={{
+            padding: "10px 14px",
+            marginBottom: "16px",
+            borderRadius: "6px",
+            background: "rgba(239, 68, 68, 0.15)",
+            border: "1px solid #ef4444",
+            color: "#dc2626",
+            fontWeight: 500,
+          }}
+        >
+          {error}
+        </div>
+      )}
+
       <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
         <select
           value={statusFilter}
@@ -52,6 +76,7 @@ function MyRequestsPage() {
           <option>All</option>
           <option>Pending</option>
           <option>Assigned</option>
+          <option>Accepted</option>
           <option>In Progress</option>
           <option>Completed</option>
           <option>Cancelled</option>
@@ -64,9 +89,9 @@ function MyRequestsPage() {
       </div>
 
       {loading ? (
-        <div className="placeholder-box">Loading your requests…</div>
+        <div className="placeholder-box">Loading requests...</div>
       ) : filtered.length === 0 ? (
-        <div className="placeholder-box">No requests match your filter.</div>
+        <div className="placeholder-box">No service requests found.</div>
       ) : (
         <div className="entity-table-wrapper">
           <table className="entity-table">
@@ -85,7 +110,7 @@ function MyRequestsPage() {
             <tbody>
               {filtered.map((r) => (
                 <tr key={r.id}>
-                  <td>{r.id}</td>
+                  <td>#{r.id}</td>
                   <td>{r.title}</td>
                   <td>{r.location}</td>
                   <td>{r.category}</td>
@@ -93,7 +118,7 @@ function MyRequestsPage() {
                     <span
                       className={`status-pill status-priority-${r.priority}`}
                     >
-                      {r.priority}
+                      Level {r.priority}
                     </span>
                   </td>
                   <td>

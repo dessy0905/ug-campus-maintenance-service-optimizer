@@ -42,19 +42,14 @@ public class MaintenanceWorkflowService {
         }
 
         int requestId = request.getRequestId();
-        CompletableFuture.runAsync(() -> {
-            try {
-                assignmentService.autoAssignNearestTechnician(requestId);
-            } catch (RuntimeException exception) {
-                exception.printStackTrace();
-            }
-        });
+        try {
+            assignmentService.autoAssignNearestTechnician(requestId);
+        } catch (RuntimeException exception) {
+            // If no suitable technician is currently available, the request remains in PENDING status
+        }
 
-        return viewService.toViewWithoutAssignment(
-            request,
-            locationName,
-            categoryName
-        );
+        Optional<ServiceRequest> updated = requestService.getRequestById(requestId);
+        return viewService.toView(updated.orElse(request));
     }
 
     public Map<String, Object> autoAssignRequest(int requestId) {

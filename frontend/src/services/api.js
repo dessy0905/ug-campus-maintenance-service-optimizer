@@ -40,7 +40,12 @@ async function request(path, options = {}) {
 export async function loginUser(credentials) {
   return request("/auth/login", {
     method: "POST",
-    body: JSON.stringify({ role: credentials.role }),
+    body: JSON.stringify({
+      role: credentials.role,
+      id: credentials.id,
+      technicianId: credentials.technicianId,
+      userId: credentials.userId,
+    }),
   });
 }
 
@@ -67,6 +72,22 @@ export async function getTechnicians() {
 
 export async function getStats() {
   return request("/stats");
+}
+
+export async function getAdminServiceRequests() {
+  return request("/admin/service-requests");
+}
+
+export async function getAdminTechnicians() {
+  return request("/admin/technicians");
+}
+
+export async function getAdminLocations() {
+  return request("/admin/locations");
+}
+
+export async function getAdminCategories() {
+  return request("/admin/categories");
 }
 
 export async function createRequest(requestData) {
@@ -101,6 +122,10 @@ export async function getTechnicianById(techId) {
   } catch {
     return null;
   }
+}
+
+export async function getTechnicianRequests(technicianId) {
+  return request(`/technicians/${technicianId}/requests`);
 }
 
 export async function getTechnicianAssignments(technicianId) {

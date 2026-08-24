@@ -3,6 +3,7 @@ package gh.edu.ug.cs.ugmaintenance.models.enums;
 public enum RequestStatus {
     PENDING,
     ASSIGNED,
+    ACCEPTED,
     IN_PROGRESS,
     COMPLETED,
     CANCELLED;
@@ -11,6 +12,7 @@ public enum RequestStatus {
         return switch (this) {
             case PENDING -> "Pending";
             case ASSIGNED -> "Assigned";
+            case ACCEPTED -> "Accepted";
             case IN_PROGRESS -> "In Progress";
             case COMPLETED -> "Completed";
             case CANCELLED -> "Cancelled";

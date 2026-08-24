@@ -56,11 +56,22 @@ public class ApiRouter implements HttpHandler {
 
         try {
             route(exchange);
-        } catch (IllegalArgumentException | IllegalStateException ex) {
-            HttpUtil.sendError(exchange, 400, ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            String msg = ex.getMessage() != null ? ex.getMessage() : "Bad request";
+            int statusCode = 400;
+            if (msg.toLowerCase().contains("unauthorized") || msg.toLowerCase().contains("not assigned")) {
+                statusCode = 403;
+            } else if (msg.toLowerCase().contains("not found")) {
+                statusCode = 404;
+            }
+            HttpUtil.sendError(exchange, statusCode, msg);
+        } catch (IllegalStateException ex) {
+            String msg = ex.getMessage() != null ? ex.getMessage() : "Conflict";
+            int statusCode = msg.toLowerCase().contains("not found") ? 404 : 409;
+            HttpUtil.sendError(exchange, statusCode, msg);
         } catch (Exception ex) {
             ex.printStackTrace();
-            HttpUtil.sendError(exchange, 500, "Internal server error.");
+            HttpUtil.sendError(exchange, 500, ex.getMessage() != null ? ex.getMessage() : "Internal server error.");
         }
     }
 
@@ -76,17 +87,17 @@ public class ApiRouter implements HttpHandler {
             return;
         }
 
-        if ("/metadata/locations".equals(apiPath) && "GET".equals(method)) {
+        if (("/metadata/locations".equals(apiPath) || "/admin/locations".equals(apiPath)) && "GET".equals(method)) {
             handleLocations(exchange);
             return;
         }
 
-        if ("/metadata/categories".equals(apiPath) && "GET".equals(method)) {
+        if (("/metadata/categories".equals(apiPath) || "/admin/categories".equals(apiPath)) && "GET".equals(method)) {
             handleCategories(exchange);
             return;
         }
 
-        if ("/requests".equals(apiPath) && "GET".equals(method)) {
+        if (("/requests".equals(apiPath) || "/admin/service-requests".equals(apiPath)) && "GET".equals(method)) {
             handleGetRequests(exchange);
             return;
         }
@@ -106,17 +117,38 @@ public class ApiRouter implements HttpHandler {
             return;
         }
 
-        if ("/stats".equals(apiPath) && "GET".equals(method)) {
+        if (("/stats".equals(apiPath) || "/admin/stats".equals(apiPath)) && "GET".equals(method)) {
             handleStats(exchange);
             return;
         }
 
-        if ("/technicians".equals(apiPath) && "GET".equals(method)) {
+        if (("/technicians".equals(apiPath) || "/admin/technicians".equals(apiPath)) && "GET".equals(method)) {
             handleTechnicians(exchange);
             return;
         }
 
-        if (apiPath.startsWith("/technicians/") && !apiPath.endsWith("/assignments")
+        if (apiPath.startsWith("/technicians/") && (apiPath.endsWith("/assignments") || apiPath.endsWith("/requests"))
+                && "GET".equals(method)) {
+            int technicianId = apiPath.endsWith("/requests")
+                    ? parseId(apiPath, "/technicians/", "/requests")
+                    : parseId(apiPath, "/technicians/", "/assignments");
+            handleTechnicianAssignments(exchange, technicianId);
+            return;
+        }
+
+        if (apiPath.startsWith("/technicians/") && apiPath.contains("/requests/") && apiPath.endsWith("/accept")
+                && ("POST".equals(method) || "PUT".equals(method))) {
+            String stripped = apiPath.substring("/technicians/".length(), apiPath.length() - "/accept".length());
+            String[] parts = stripped.split("/requests/");
+            int technicianId = Integer.parseInt(parts[0]);
+            int requestId = Integer.parseInt(parts[1]);
+            assignmentService.acceptAssignmentByRequest(requestId, technicianId);
+            Optional<ServiceRequest> request = requestService.getRequestById(requestId);
+            HttpUtil.sendJson(exchange, 200, viewService.toView(request.orElseThrow()));
+            return;
+        }
+
+        if (apiPath.startsWith("/technicians/") && !apiPath.endsWith("/assignments") && !apiPath.endsWith("/requests")
                 && "GET".equals(method)) {
             int technicianId = Integer.parseInt(apiPath.substring("/technicians/".length()));
             handleTechnician(exchange, technicianId);
@@ -164,20 +196,21 @@ public class ApiRouter implements HttpHandler {
             return;
         }
 
-        if (apiPath.startsWith("/technicians/") && apiPath.endsWith("/assignments")
-                && "GET".equals(method)) {
-            int technicianId = parseId(apiPath, "/technicians/", "/assignments");
-            handleTechnicianAssignments(exchange, technicianId);
-            return;
-        }
-
         HttpUtil.sendError(exchange, 404, "Route not found.");
     }
 
     private void handleLogin(HttpExchange exchange) throws IOException {
         Map<String, Object> body = readMap(exchange);
         String role = String.valueOf(body.get("role"));
-        HttpUtil.sendJson(exchange, 200, authService.loginByFrontendRole(role));
+        Integer entityId = null;
+        if (body.get("technicianId") instanceof Number num) {
+            entityId = num.intValue();
+        } else if (body.get("userId") instanceof Number num) {
+            entityId = num.intValue();
+        } else if (body.get("id") instanceof Number num) {
+            entityId = num.intValue();
+        }
+        HttpUtil.sendJson(exchange, 200, authService.login(role, entityId));
     }
 
     private void handleLocations(HttpExchange exchange) throws IOException {
@@ -206,32 +239,28 @@ public class ApiRouter implements HttpHandler {
         String query = exchange.getRequestURI().getQuery();
         Map<String, String> params = parseQuery(query);
 
-        if (params.containsKey("userId")) {
-            int userId = Integer.parseInt(params.get("userId"));
-            List<ServiceRequest> requests = requestService.getRequestsByUser(userId);
-            HttpUtil.sendJson(exchange, 200, viewService.toViews(requests));
-            return;
-        }
+        List<ServiceRequest> requests = params.containsKey("userId")
+                ? requestService.getRequestsByUser(Integer.parseInt(params.get("userId")))
+                : requestService.getAllRequests();
 
-        List<ServiceRequest> requests = requestService.getAllRequests();
-        ArrayList<Map<String, Object>> views = new ArrayList<>();
         List<Map<String, Object>> mapped = viewService.toViews(requests);
+        ArrayList<Map<String, Object>> views = new ArrayList<>();
 
         for (int i = 0; i < mapped.size(); i++) {
             views.add(mapped.get(i));
         }
 
-        if (params.containsKey("status") && !"All".equals(params.get("status"))) {
-            views.removeIf(item -> !params.get("status").equals(item.get("status")));
+        if (params.containsKey("status") && !"All".equalsIgnoreCase(params.get("status"))) {
+            views.removeIf(item -> !params.get("status").equalsIgnoreCase(String.valueOf(item.get("status"))));
         }
 
-        if (params.containsKey("category") && !"All".equals(params.get("category"))) {
-            views.removeIf(item -> !params.get("category").equals(item.get("category")));
+        if (params.containsKey("category") && !"All".equalsIgnoreCase(params.get("category"))) {
+            views.removeIf(item -> !params.get("category").equalsIgnoreCase(String.valueOf(item.get("category"))));
         }
 
-        if (params.containsKey("priority") && !"All".equals(params.get("priority"))) {
+        if (params.containsKey("priority") && !"All".equalsIgnoreCase(params.get("priority"))) {
             int priority = Integer.parseInt(params.get("priority"));
-            views.removeIf(item -> priority != (int) item.get("priority"));
+            views.removeIf(item -> item.get("priority") == null || priority != ((Number) item.get("priority")).intValue());
         }
 
         HttpUtil.sendJson(exchange, 200, views);
@@ -245,15 +274,23 @@ public class ApiRouter implements HttpHandler {
         requireField(body, "location");
         requireField(body, "category");
         requireField(body, "priority");
-        requireField(body, "createdBy");
+
+        Object createdByObj = body.get("createdBy") != null ? body.get("createdBy") : body.get("userId");
+        if (createdByObj == null) {
+            HttpUtil.sendError(exchange, 400, "createdBy is required.");
+            return;
+        }
+
+        int createdBy = parseInt(createdByObj, 1);
+        int priority = parsePriority(body.get("priority"));
 
         Map<String, Object> created = workflowService.createRequestAndAssign(
                 String.valueOf(body.get("title")),
                 String.valueOf(body.get("description")),
                 String.valueOf(body.get("location")),
                 String.valueOf(body.get("category")),
-                ((Number) body.get("priority")).intValue(),
-                ((Number) body.get("createdBy")).intValue()
+                priority,
+                createdBy
         );
 
         HttpUtil.sendJson(exchange, 201, created);
@@ -277,7 +314,7 @@ public class ApiRouter implements HttpHandler {
         Map<String, Object> body = readMap(exchange);
 
         if (body.containsKey("technicianId")) {
-            int technicianId = ((Number) body.get("technicianId")).intValue();
+            int technicianId = parseInt(body.get("technicianId"), 0);
             assignmentService.assignTechnician(requestId, technicianId);
             Optional<ServiceRequest> request = requestService.getRequestById(requestId);
             HttpUtil.sendJson(exchange, 200, viewService.toView(request.orElseThrow()));
@@ -306,7 +343,7 @@ public class ApiRouter implements HttpHandler {
             throws IOException {
 
         Map<String, Object> body = readMap(exchange);
-        int technicianId = ((Number) body.get("technicianId")).intValue();
+        int technicianId = parseInt(body.get("technicianId"), 0);
         assignmentService.acceptAssignmentByRequest(requestId, technicianId);
 
         Optional<ServiceRequest> request = requestService.getRequestById(requestId);
@@ -317,7 +354,7 @@ public class ApiRouter implements HttpHandler {
             throws IOException {
 
         Map<String, Object> body = readMap(exchange);
-        int technicianId = ((Number) body.get("technicianId")).intValue();
+        int technicianId = parseInt(body.get("technicianId"), 0);
         assignmentService.rejectAssignmentByRequest(requestId, technicianId);
 
         Optional<ServiceRequest> request = requestService.getRequestById(requestId);
@@ -359,22 +396,72 @@ public class ApiRouter implements HttpHandler {
         List<ServiceRequest> all = requestService.getAllRequests();
         int total = all.size();
         int pending = 0;
+        int assigned = 0;
+        int accepted = 0;
+        int inProgress = 0;
         int completed = 0;
+        int cancelled = 0;
+
+        List<TechnicianAssignment> allAssignments = assignmentRepository.findAll();
+        java.util.Map<Integer, TechnicianAssignment> assignmentMap = new java.util.HashMap<>();
+        for (int i = 0; i < allAssignments.size(); i++) {
+            TechnicianAssignment a = allAssignments.get(i);
+            assignmentMap.put(a.getRequestId(), a);
+        }
 
         for (int i = 0; i < all.size(); i++) {
-            RequestStatus status = all.get(i).getStatus();
-            if (status == RequestStatus.PENDING) {
+            ServiceRequest r = all.get(i);
+            RequestStatus status = r.getStatus();
+            TechnicianAssignment assign = assignmentMap.get(r.getRequestId());
+            String assignStatus = assign != null && assign.getAssignmentStatus() != null
+                    ? assign.getAssignmentStatus().getDbValue()
+                    : null;
+
+            if ("Accepted".equalsIgnoreCase(assignStatus) || status == RequestStatus.ACCEPTED) {
+                accepted++;
+            } else if (status == RequestStatus.PENDING) {
                 pending++;
+            } else if (status == RequestStatus.ASSIGNED) {
+                assigned++;
+            } else if (status == RequestStatus.IN_PROGRESS) {
+                inProgress++;
             } else if (status == RequestStatus.COMPLETED) {
                 completed++;
+            } else if (status == RequestStatus.CANCELLED) {
+                cancelled++;
             }
         }
 
-        HttpUtil.sendJson(
-                exchange,
-                200,
-                Map.of("total", total, "pending", pending, "completed", completed)
-        );
+        List<Technician> allTechnicians = technicianService.getAllTechnicians();
+        int totalTechnicians = allTechnicians.size();
+        int availableTechnicians = 0;
+        int busyTechnicians = 0;
+        for (int i = 0; i < allTechnicians.size(); i++) {
+            if (allTechnicians.get(i).isAvailabilityStatus()) {
+                availableTechnicians++;
+            } else {
+                busyTechnicians++;
+            }
+        }
+
+        int totalLocations = locationRepository.findAll().size();
+        int totalCategories = categoryRepository.findAll().size();
+
+        Map<String, Object> stats = new LinkedHashMap<>();
+        stats.put("total", total);
+        stats.put("pending", pending);
+        stats.put("assigned", assigned);
+        stats.put("accepted", accepted);
+        stats.put("inProgress", inProgress);
+        stats.put("completed", completed);
+        stats.put("cancelled", cancelled);
+        stats.put("totalTechnicians", totalTechnicians);
+        stats.put("availableTechnicians", availableTechnicians);
+        stats.put("busyTechnicians", busyTechnicians);
+        stats.put("totalLocations", totalLocations);
+        stats.put("totalCategories", totalCategories);
+
+        HttpUtil.sendJson(exchange, 200, stats);
     }
 
     private void handleRoute(HttpExchange exchange, int requestId)
@@ -405,22 +492,27 @@ public class ApiRouter implements HttpHandler {
         int startLocationId = technician.get().getLocationId();
         int endLocationId = request.get().getLocationId();
 
+        if (startLocationId <= 0 || endLocationId <= 0) {
+            HttpUtil.sendError(exchange, 400, "Invalid location ID for route calculation.");
+            return;
+        }
+
         List<Integer> routeIds = routeService.findShortestRoute(
                 startLocationId,
                 endLocationId
         );
-        List<String> routeNames = routeService.findShortestRouteNames(
-                startLocationId,
-                endLocationId
-        );
+        List<String> routeNames = routeService.resolveLocationNames(routeIds);
         double distanceKm = routeService.calculateRouteDistance(
                 startLocationId,
                 endLocationId
         );
 
+        String startName = !routeNames.isEmpty() ? routeNames.get(0) : routeService.getLocationName(startLocationId);
+        String endName = !routeNames.isEmpty() ? routeNames.get(routeNames.size() - 1) : routeService.getLocationName(endLocationId);
+
         Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("start", routeService.getLocationName(startLocationId));
-        payload.put("destination", routeService.getLocationName(endLocationId));
+        payload.put("start", startName);
+        payload.put("destination", endName);
         payload.put("distanceKm", distanceKm);
         payload.put("distanceMeters", Math.round(distanceKm * 1000));
         payload.put("steps", toJavaList(routeNames));
@@ -480,6 +572,42 @@ public class ApiRouter implements HttpHandler {
     private int parseId(String apiPath, String prefix, String suffix) {
         String middle = apiPath.substring(prefix.length(), apiPath.length() - suffix.length());
         return Integer.parseInt(middle);
+    }
+
+    private int parseInt(Object val, int fallback) {
+        if (val == null) {
+            return fallback;
+        }
+        if (val instanceof Number n) {
+            return n.intValue();
+        }
+        try {
+            return Integer.parseInt(String.valueOf(val).trim());
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+    }
+
+    private int parsePriority(Object val) {
+        if (val == null) {
+            return 3;
+        }
+        if (val instanceof Number n) {
+            return n.intValue();
+        }
+        String str = String.valueOf(val).trim();
+        try {
+            return Integer.parseInt(str);
+        } catch (NumberFormatException e) {
+            return switch (str.toLowerCase()) {
+                case "urgent", "critical", "emergency" -> 5;
+                case "high" -> 4;
+                case "medium" -> 3;
+                case "low" -> 2;
+                case "very low" -> 1;
+                default -> 3;
+            };
+        }
     }
 
     private ArrayList<Object> toJavaList(List<?> source) {

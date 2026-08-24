@@ -10,6 +10,8 @@ function AdminRequestsPage() {
   const [requests, setRequests] = useState([]);
   const [techs, setTechs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [assignMessage, setAssignMessage] = useState(null);
   const [filters, setFilters] = useState({
     status: "All",
     priority: "All",
@@ -18,13 +20,19 @@ function AdminRequestsPage() {
 
   const load = async () => {
     setLoading(true);
-    const [all, technicians] = await Promise.all([
-      getAllRequests(),
-      getTechnicians(),
-    ]);
-    setRequests(all);
-    setTechs(technicians);
-    setLoading(false);
+    setError(null);
+    try {
+      const [all, technicians] = await Promise.all([
+        getAllRequests(),
+        getTechnicians(),
+      ]);
+      setRequests(all || []);
+      setTechs(technicians || []);
+    } catch {
+      setError("Unable to load requests. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -43,11 +51,22 @@ function AdminRequestsPage() {
   }, [requests, filters]);
 
   const onAssign = async (requestId) => {
+    setAssignMessage(null);
     try {
-      await assignTechnicianToRequest(requestId);
+      const res = await assignTechnicianToRequest(requestId);
+      if (res && res.assignedTechnician) {
+        setAssignMessage({
+          type: "success",
+          text: `Technician #${res.assignedTechnician} successfully assigned to Request #${requestId}.`,
+        });
+      }
       await load();
     } catch (err) {
-      alert(err.message || "Failed to assign technician.");
+      const msg =
+        err.message && err.message.toLowerCase().includes("no technician")
+          ? "No available technician is currently available for this category."
+          : err.message || "Failed to assign technician.";
+      setAssignMessage({ type: "error", text: msg });
     }
   };
 
@@ -56,7 +75,46 @@ function AdminRequestsPage() {
       <div className="dashboard-header">
         <h2>Requests Management</h2>
       </div>
-      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+
+      {error && (
+        <div
+          style={{
+            padding: "10px 14px",
+            marginBottom: "16px",
+            borderRadius: "6px",
+            background: "rgba(239, 68, 68, 0.15)",
+            border: "1px solid #ef4444",
+            color: "#dc2626",
+            fontWeight: 500,
+          }}
+        >
+          {error}
+        </div>
+      )}
+
+      {assignMessage && (
+        <div
+          style={{
+            padding: "10px 14px",
+            marginBottom: "16px",
+            borderRadius: "6px",
+            background:
+              assignMessage.type === "success"
+                ? "rgba(34, 197, 94, 0.15)"
+                : "rgba(239, 68, 68, 0.15)",
+            border:
+              assignMessage.type === "success"
+                ? "1px solid #22c55e"
+                : "1px solid #ef4444",
+            color: assignMessage.type === "success" ? "#16a34a" : "#dc2626",
+            fontWeight: 500,
+          }}
+        >
+          {assignMessage.text}
+        </div>
+      )}
+
+      <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
         <select
           value={filters.status}
           onChange={(e) => setFilters({ ...filters, status: e.target.value })}
@@ -64,6 +122,7 @@ function AdminRequestsPage() {
           <option>All</option>
           <option>Pending</option>
           <option>Assigned</option>
+          <option>Accepted</option>
           <option>In Progress</option>
           <option>Completed</option>
           <option>Cancelled</option>
@@ -74,7 +133,9 @@ function AdminRequestsPage() {
         >
           <option>All</option>
           {[1, 2, 3, 4, 5].map((p) => (
-            <option key={p}>{p}</option>
+            <option key={p} value={p}>
+              Priority {p}
+            </option>
           ))}
         </select>
         <select
@@ -85,13 +146,17 @@ function AdminRequestsPage() {
           <option>Plumbing</option>
           <option>Electrical</option>
           <option>HVAC</option>
+          <option>AC services</option>
           <option>Carpentry</option>
-          <option>Masonry</option>
+          <option>Cleaning</option>
+          <option>Security</option>
         </select>
       </div>
 
       {loading ? (
-        <div className="placeholder-box">Loading requests…</div>
+        <div className="placeholder-box">Loading requests...</div>
+      ) : filtered.length === 0 ? (
+        <div className="placeholder-box">No service requests found.</div>
       ) : (
         <div className="entity-table-wrapper">
           <table className="entity-table">
@@ -110,14 +175,14 @@ function AdminRequestsPage() {
             <tbody>
               {filtered.map((r) => (
                 <tr key={r.id}>
-                  <td>{r.id}</td>
+                  <td>#{r.id}</td>
                   <td>{r.title}</td>
                   <td>{r.location}</td>
                   <td>
                     <span
                       className={`status-pill status-priority-${r.priority}`}
                     >
-                      {r.priority}
+                      Level {r.priority}
                     </span>
                   </td>
                   <td>{r.category}</td>
@@ -129,16 +194,25 @@ function AdminRequestsPage() {
                     </span>
                   </td>
                   <td>
-                    {r.assignedTechnician
-                      ? techs.find((t) => t.id === r.assignedTechnician)
-                          ?.name || r.assignedTechnician
-                      : "—"}
+                    {r.assignedTechnician ? (
+                      techs.find((t) => t.id === r.assignedTechnician)?.name ||
+                      `Tech #${r.assignedTechnician}`
+                    ) : (
+                      <span style={{ color: "#94a3b8", fontStyle: "italic" }}>
+                        Waiting for technician assignment.
+                      </span>
+                    )}
                   </td>
                   <td>
-                    <button onClick={() => onAssign(r.id)}>
-                      Auto-Assign Nearest
-                    </button>
-                    <button style={{ marginLeft: 8 }}>View Details</button>
+                    {!r.assignedTechnician ? (
+                      <button onClick={() => onAssign(r.id)}>
+                        Auto-Assign Nearest
+                      </button>
+                    ) : (
+                      <span style={{ fontSize: "0.85rem", color: "#16a34a", fontWeight: 500 }}>
+                        Assigned
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}
