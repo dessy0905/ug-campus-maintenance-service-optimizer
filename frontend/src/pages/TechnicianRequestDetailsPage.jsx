@@ -39,29 +39,51 @@ function TechnicianRequestDetailsPage() {
     load();
   }, [id]);
 
+  const [actionError, setActionError] = useState(null);
+
   const doAccept = async () => {
-    await acceptAssignment(id, user.id);
-    const r = await getRequestById(id);
-    setRequest(r);
+    setActionError(null);
+    try {
+      await acceptAssignment(id, user.id);
+      const r = await getRequestById(id);
+      setRequest(r);
+    } catch (err) {
+      setActionError(err.message || "Failed to accept assignment.");
+    }
   };
 
   const doReject = async () => {
     const reason = prompt("Optional rejection reason");
-    await rejectAssignment(id, reason, user.id);
-    const r = await getRequestById(id);
-    setRequest(r);
+    setActionError(null);
+    try {
+      await rejectAssignment(id, reason, user.id);
+      const r = await getRequestById(id);
+      setRequest(r);
+    } catch (err) {
+      setActionError(err.message || "Failed to reject assignment.");
+    }
   };
 
   const startWork = async () => {
-    await updateRequestStatus(id, "In Progress");
-    const r = await getRequestById(id);
-    setRequest(r);
+    setActionError(null);
+    try {
+      await updateRequestStatus(id, "In Progress");
+      const r = await getRequestById(id);
+      setRequest(r);
+    } catch (err) {
+      setActionError(err.message || "Failed to start work.");
+    }
   };
 
   const completeWork = async () => {
-    await updateRequestStatus(id, "Completed");
-    const r = await getRequestById(id);
-    setRequest(r);
+    setActionError(null);
+    try {
+      await updateRequestStatus(id, "Completed");
+      const r = await getRequestById(id);
+      setRequest(r);
+    } catch (err) {
+      setActionError(err.message || "Failed to complete work.");
+    }
   };
 
   if (loading)
@@ -121,20 +143,47 @@ function TechnicianRequestDetailsPage() {
 
           <div className="secondary-section" style={{ marginTop: 18 }}>
             <h3>Action Panel</h3>
-            <div style={{ display: "flex", gap: 8 }}>
+            {actionError && (
+              <div
+                style={{
+                  padding: "8px 12px",
+                  marginBottom: 10,
+                  borderRadius: 6,
+                  background: "rgba(239, 68, 68, 0.15)",
+                  color: "#dc2626",
+                  fontSize: "0.9rem",
+                  fontWeight: 500,
+                }}
+              >
+                {actionError}
+              </div>
+            )}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {(request.status === "Assigned" ||
-                request.status === "Pending") && (
-                <button onClick={doAccept}>Accept Assignment</button>
+                request.assignmentStatus === "Assigned" ||
+                request.status === "Pending") &&
+                request.status !== "Accepted" &&
+                request.assignmentStatus !== "Accepted" && (
+                <>
+                  <button onClick={doAccept} style={{ backgroundColor: "#16a34a", color: "#fff" }}>
+                    Accept Assignment
+                  </button>
+                  <button onClick={doReject} style={{ backgroundColor: "#dc2626", color: "#fff" }}>
+                    Reject Assignment
+                  </button>
+                </>
               )}
-              {(request.status === "Assigned" ||
-                request.status === "Pending") && (
-                <button onClick={doReject}>Reject Assignment</button>
-              )}
-              {request.status === "Assigned" && (
-                <button onClick={startWork}>Start Work (In Progress)</button>
+              {(request.status === "Accepted" ||
+                request.assignmentStatus === "Accepted" ||
+                request.status === "Assigned") && (
+                <button onClick={startWork} style={{ backgroundColor: "#2563eb", color: "#fff" }}>
+                  Start Work (In Progress)
+                </button>
               )}
               {request.status === "In Progress" && (
-                <button onClick={completeWork}>Mark as Completed</button>
+                <button onClick={completeWork} style={{ backgroundColor: "#059669", color: "#fff" }}>
+                  Mark as Completed
+                </button>
               )}
             </div>
           </div>

@@ -21,6 +21,10 @@ public class RouteService {
     private final TechnicianRepository technicianRepository;
     private final LocationRepository locationRepository;
 
+    private static volatile Graph cachedGraph;
+    private static volatile HashMap<Integer, String> cachedLocationNames;
+    private static final Object LOCK = new Object();
+
     public RouteService() {
         this.roadRepository = new RoadRepository();
         this.technicianRepository = new TechnicianRepository();
@@ -36,7 +40,7 @@ public class RouteService {
             return path;
         }
 
-        Graph graph = buildGraph();
+        Graph graph = getOrCreateGraph();
 
         if (!graph.containsVertex(startLocationId) || !graph.containsVertex(endLocationId)) {
             return new DynamicArray<>();
@@ -61,6 +65,12 @@ public class RouteService {
     public String getLocationName(int locationId) {
         validateLocationId(locationId);
 
+        HashMap<Integer, String> names = getLocationNameIndex();
+        String name = names.get(locationId);
+        if (name != null) {
+            return name;
+        }
+
         return locationRepository.findById(locationId)
                 .map(location -> location.getLocationName())
                 .orElse(fallbackLocationName(locationId));
@@ -71,7 +81,7 @@ public class RouteService {
             return new DynamicArray<>();
         }
 
-        HashMap<Integer, String> locationNames = buildLocationNameIndex();
+        HashMap<Integer, String> locationNames = getLocationNameIndex();
         List<String> names = new DynamicArray<>();
 
         for (int i = 0; i < locationIds.size(); i++) {
@@ -95,20 +105,16 @@ public class RouteService {
             return -1.0;
         }
 
+        Graph graph = getOrCreateGraph();
         double totalDistance = 0.0;
         for (int i = 0; i < route.size() - 1; i++) {
             int from = route.get(i);
             int to = route.get(i + 1);
-            List<Road> neighbors = roadRepository.findByFromLocation(from);
-            double segmentDistance = 0.0;
-            for (int j = 0; j < neighbors.size(); j++) {
-                Road road = neighbors.get(j);
-                if (road.getToLocationId() == to) {
-                    segmentDistance = road.getDistanceKm();
-                    break;
-                }
+            try {
+                totalDistance += graph.getEdgeWeight(from, to);
+            } catch (Exception e) {
+                // fall through
             }
-            totalDistance += segmentDistance;
         }
 
         return totalDistance == 0.0 && route.size() > 1 ? -1.0 : totalDistance;
@@ -132,7 +138,7 @@ public class RouteService {
             return Optional.empty();
         }
 
-        Graph graph = buildGraph();
+        Graph graph = getOrCreateGraph();
         if (!graph.containsVertex(locationId)) {
             return Optional.empty();
         }
@@ -162,6 +168,32 @@ public class RouteService {
         }
 
         return Optional.ofNullable(nearestTechnician);
+    }
+
+    private Graph getOrCreateGraph() {
+        if (cachedGraph != null) {
+            return cachedGraph;
+        }
+        synchronized (LOCK) {
+            if (cachedGraph != null) {
+                return cachedGraph;
+            }
+            cachedGraph = buildGraph();
+            return cachedGraph;
+        }
+    }
+
+    private HashMap<Integer, String> getLocationNameIndex() {
+        if (cachedLocationNames != null) {
+            return cachedLocationNames;
+        }
+        synchronized (LOCK) {
+            if (cachedLocationNames != null) {
+                return cachedLocationNames;
+            }
+            cachedLocationNames = buildLocationNameIndex();
+            return cachedLocationNames;
+        }
     }
 
     private Graph buildGraph() {

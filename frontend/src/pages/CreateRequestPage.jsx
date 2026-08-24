@@ -203,25 +203,96 @@ function CreateRequestPage() {
           </div>
         </form>
       ) : (
-        <div className="placeholder-box">
-          <h3>Request Created</h3>
-          <p>
-            Your request has been created with ID <strong>{created.id}</strong>.
-          </p>
-          {created.assignedTechnician ? (
-            <p>
-              Assigned technician ID:{" "}
-              <strong>{created.assignedTechnician}</strong>
-            </p>
-          ) : (
-            <p>No technician was available for automatic assignment.</p>
-          )}
-          <div className="success-actions">
-            <button onClick={() => navigate(`/user/requests/${created.id}`)}>
+        <div className="placeholder-box" style={{ textAlign: "left", padding: "24px", maxWidth: 640 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #e2e8f0", paddingBottom: 12 }}>
+            <h3 style={{ margin: 0, color: "#16a34a" }}>✓ Request Submitted Successfully</h3>
+            <span
+              className={`status-pill status-${String(created.status || "Pending").replace(/\s+/g, "-").toLowerCase()}`}
+            >
+              Status: {created.status || "Pending"}
+            </span>
+          </div>
+
+          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 14 }}>
+            <tbody>
+              <tr>
+                <td style={{ padding: "6px 0", color: "#64748b", width: 140 }}>
+                  <strong>Request ID:</strong>
+                </td>
+                <td style={{ padding: "6px 0", fontWeight: 700 }}>
+                  #{created.id}
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: "6px 0", color: "#64748b" }}>
+                  <strong>Title:</strong>
+                </td>
+                <td style={{ padding: "6px 0", fontWeight: 600 }}>
+                  {created.title}
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: "6px 0", color: "#64748b" }}>
+                  <strong>Category:</strong>
+                </td>
+                <td style={{ padding: "6px 0" }}>{created.category}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: "6px 0", color: "#64748b" }}>
+                  <strong>Location:</strong>
+                </td>
+                <td style={{ padding: "6px 0" }}>{created.location}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: "6px 0", color: "#64748b" }}>
+                  <strong>Priority:</strong>
+                </td>
+                <td style={{ padding: "6px 0" }}>
+                  <span className={`status-pill status-priority-${created.priority}`}>
+                    Level {created.priority}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: "6px 0", color: "#64748b" }}>
+                  <strong>Current Status:</strong>
+                </td>
+                <td style={{ padding: "6px 0", fontWeight: 600 }}>
+                  {created.status || "Pending"}
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: "6px 0", color: "#64748b" }}>
+                  <strong>Technician:</strong>
+                </td>
+                <td style={{ padding: "6px 0" }}>
+                  {created.assignedTechnician
+                    ? `Assigned to Technician #${created.assignedTechnician}`
+                    : "Auto-assignment matching initiated..."}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div className="success-actions" style={{ display: "flex", gap: "10px", marginTop: 20 }}>
+            <button
+              onClick={() => navigate(`/user/requests/${created.id}`)}
+              style={{ backgroundColor: "#2563eb", color: "#fff" }}
+            >
               View Request Details
             </button>
             <button onClick={() => navigate("/user/my-requests")}>
               Go to My Requests
+            </button>
+            <button
+              onClick={() => {
+                setCreated(null);
+                setTitle("");
+                setDescription("");
+              }}
+              style={{ background: "transparent", border: "1px solid #cbd5e1" }}
+            >
+              Create Another Request
             </button>
           </div>
         </div>

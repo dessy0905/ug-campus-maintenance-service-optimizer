@@ -217,6 +217,15 @@ public class ServiceRequestRepository
             statement.setInt(2, requestId);
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
+            if (status == RequestStatus.ACCEPTED) {
+                try (Connection connection = getConnection();
+                     PreparedStatement statement = connection.prepareStatement(sql)) {
+                    statement.setString(1, "Assigned");
+                    statement.setInt(2, requestId);
+                    return statement.executeUpdate() > 0;
+                } catch (SQLException ignored) {
+                }
+            }
             e.printStackTrace();
             return false;
         }

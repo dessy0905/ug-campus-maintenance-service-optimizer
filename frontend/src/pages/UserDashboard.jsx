@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { getRequests, getStats } from "../services/api";
+import { getUserRequests, getStats } from "../services/api";
 
 function UserDashboard() {
   const { user } = useAuth();
@@ -10,18 +10,16 @@ function UserDashboard() {
 
   useEffect(() => {
     async function loadDashboard() {
-      if (!user) {
+      if (!user || !user.id) {
         return;
       }
 
       setLoading(true);
-      const [allRequests, summary] = await Promise.all([
-        getRequests(),
-        getStats(),
+      const [userRequests, summary] = await Promise.all([
+        getUserRequests(user.id).catch(() => []),
+        getStats().catch(() => null),
       ]);
-      setRequests(
-        allRequests.filter((request) => request.createdBy === user.id),
-      );
+      setRequests(userRequests || []);
       setStats(summary);
       setLoading(false);
     }
